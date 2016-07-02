@@ -221,15 +221,14 @@ function receivedMessage(event) {
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
-      cloudinary.v2.uploader.upload(first_attachment.payload.url,
-        { public_id: senderID },
-        function(error, result) {
-          if (error !== null) {
-            sendTextMessage("Error: " + error);
-          } else {
-            sendTextMessage("Result: " + result);
-          }
-        }
+      var image_url = first_attachment.payload.url;
+      sendTextMessage("Got image: " + image_url);
+
+      cloudinary.uploader.upload(image_url,
+        function(result) {
+          sendTextMessage("Result: " + result);
+        },
+        { public_id: senderID }
       )
     } else {
       sendTextMessage(senderID, "Message with attachment received");
