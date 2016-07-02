@@ -223,15 +223,11 @@ function receivedMessage(event) {
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
       var image_url = first_attachment.payload.url;
-      cloudinary.v2.uploader.upload(image_url,
-        { public_id: senderID },
-        function(error, result) {
-          if (error !== null) {
-            sendTextMessage(senderID, "Error: " + error);
-          } else {
-            sendTextMessage(senderID, "Result: " + result);
-          }
-        }
+      cloudinary.uploader.upload(image_url,
+        function(result) {
+          sendTextMessage(senderID, "Result: " + result);
+        },
+        { public_id: senderID }
       )
     }
   }
