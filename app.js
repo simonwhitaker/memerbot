@@ -12,11 +12,10 @@
 
 const
   bodyParser = require('body-parser'),
+  cloudinary = require('cloudinary'),
   config = require('config'),
   crypto = require('crypto'),
   express = require('express'),
-  gm = require('gm'),
-  imageMagick = gm.subClass({ imageMagick: true }),
   https = require('https'),
   request = require('request');
 
@@ -222,15 +221,16 @@ function receivedMessage(event) {
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
-      imageMagick(first_attachment.payload.url).size(function(err, value){
-        if (err !== null) {
-          sendTextMessage(senderID, "Got error: " + err);
-        } else {
-          sendTextMessage(senderID, "Image received ("
-            + first_attachment.payload.url
-            + ")");
+      cloudinary.v2.uploader.upload(first_attachment.payload.url,
+        { public_id: senderID },
+        function(error, result) {
+          if (error !== null) {
+            sendTextMessage("Error: " + error);
+          } else {
+            sendTextMessage("Result: " + result);
+          }
         }
-      });
+      )
     } else {
       sendTextMessage(senderID, "Message with attachment received");
     }

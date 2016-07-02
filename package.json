@@ -16,9 +16,9 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "cloudinary": "1.4.1",
     "config": "^1.20.4",
     "express": "^4.13.4",
-    "gm": "1.22.0",
     "request": "^2.72.0"
   },
   "engines": {
