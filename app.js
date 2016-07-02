@@ -205,6 +205,7 @@ function receivedMessage(event) {
     var s = S(messageText);
     if (s.startsWith('top ')) {
       var message = s.chompLeft('top ');
+      message = encodeURIComponent(message.toUpperCase());
       var transformed_url = cloudinary.url(senderID,
         { transformation:
           [
@@ -214,6 +215,8 @@ function receivedMessage(event) {
             {
               width: 480,
               overlay: "text:Impact_80:" + message,
+              stroke: "stroke",
+              border: "2px_soid_black",
               color: "#ffffff",
               crop: "fit",
               gravity: "north"
