@@ -1,0 +1,6 @@
+{
+  "name": "Memer Bot",
+  "description": "A Messenger bot to build memes",
+  "repository": "https://github.com/simonwhitaker/memerbot",
+  "keywords": ["messenger", "meme", "bot", "memer"],
+}
