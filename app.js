@@ -17,7 +17,8 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),
-  request = require('request');
+  request = require('request'),
+  S = require('string');
 
 var app = express();
 
@@ -201,21 +202,26 @@ function receivedMessage(event) {
   var messageAttachments = message.attachments;
 
   if (messageText) {
-
-    // If we receive a text message, check to see if it matches any special
-    // keywords and send back the corresponding example. Otherwise, just echo
-    // the text we received.
-    switch (messageText) {
-      case 'button':
-        sendButtonMessage(senderID);
-        break;
-
-      default:
-        sendHelpMessage(senderID);
-        break;
+    var s = S(messageText);
+    if (s.startsWith('top ')) {
+      var message = s.chompLeft('top ');
+      var transformed_url = cloudinary.url(senderID,
+        { transformation:
+          [
+            { width: 500 },
+            { overlay: "text:Arial_80:" + message }
+          ]
+        }
+      );
+      sendImageMessage(senderID, transformed_url);
+    }
+    else if (s.startsWith('bottom')) {
+      var message = s.chompLeft('bottom ');
+    }
+    else {
+      sendHelpMessage(senderID);
     }
   } else if (messageAttachments) {
-    sendTextMessage(senderID, "Message with attachment(s) received");
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
       var image_url = first_attachment.payload.url;
@@ -225,7 +231,6 @@ function receivedMessage(event) {
           var cloudinary_url = result.secure_url;
           if (cloudinary_url !== null) {
             sendTextMessage(senderID, "Image received!");
-            sendImageMessage(senderID, cloudinary_url);
             sendTextMessage(senderID, "Now use 'top <text>' or 'bottom <text>' to add text");
           } else {
             sendTextMessage(senderID, "Error: " + error);

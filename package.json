@@ -19,7 +19,8 @@
     "cloudinary": "1.4.1",
     "config": "^1.20.4",
     "express": "^4.13.4",
-    "request": "^2.72.0"
+    "request": "^2.72.0",
+    "string": "3.3.1"
   },
   "engines": {
     "node": "6.2.2"
