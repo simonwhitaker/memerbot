@@ -15,6 +15,7 @@ const
   config = require('config'),
   crypto = require('crypto'),
   express = require('express'),
+  gm = require('gm'),
   https = require('https'),
   request = require('request');
 
@@ -218,7 +219,12 @@ function receivedMessage(event) {
         break;
     }
   } else if (messageAttachments) {
-    sendTextMessage(senderID, "Message with attachment received");
+    var first_attachment = messageAttachments[0];
+    if (first_attachment.type === 'image') {
+      sendTextMessage(senderID, "Image received");
+    } else {
+      sendTextMessage(senderID, "Message with attachment received");
+    }
   }
 }
 
