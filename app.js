@@ -226,14 +226,8 @@ function receivedMessage(event) {
       cloudinary.v2.uploader.upload(image_url,
         { public_id: senderID },
         function(error, result) {
-          if (error !== null) {
-            sendTextMessage(senderID, "Error: " + error);
-          } else {
-            sendTextMessage(senderID, "URL: "
-              + result.url
-              + "\nSecure URL: "
-              + result.secure_url);
-          }
+          sendTextMessage(senderID, "Result: " + result.url);
+          sendTextMessage(senderID, "Error: " + error);
         }
       )
     }
