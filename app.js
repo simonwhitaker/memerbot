@@ -206,10 +206,6 @@ function receivedMessage(event) {
     // keywords and send back the corresponding example. Otherwise, just echo
     // the text we received.
     switch (messageText) {
-      case 'image':
-        sendImageMessage(senderID);
-        break;
-
       case 'button':
         sendButtonMessage(senderID);
         break;
@@ -226,8 +222,14 @@ function receivedMessage(event) {
       cloudinary.v2.uploader.upload(image_url,
         { public_id: senderID },
         function(error, result) {
-          sendTextMessage(senderID, "Result: " + result.url);
-          sendTextMessage(senderID, "Error: " + error);
+          var cloudinary_url = result.secure_url;
+          if (cloudinary_url !== null) {
+            sendTextMessage(senderID, "Image received!");
+            sendImageMessage(senderID, cloudinary_url);
+            sendTextMessage(senderID, "Now use 'top <text>' or 'bottom <text>' to add text");
+          } else {
+            sendTextMessage(senderID, "Error: " + error);
+          }
         }
       )
     }
@@ -290,7 +292,7 @@ function receivedPostback(event) {
  * Send a message with an using the Send API.
  *
  */
-function sendImageMessage(recipientId) {
+function sendImageMessage(recipientId, image_url) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -299,7 +301,7 @@ function sendImageMessage(recipientId) {
       attachment: {
         type: "image",
         payload: {
-          url: "http://i.imgur.com/zYIlgBl.png"
+          url: image_url
         }
       }
     }
