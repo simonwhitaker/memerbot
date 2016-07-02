@@ -221,9 +221,15 @@ function receivedMessage(event) {
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
-      sendTextMessage(senderID, "Image received ("
-        + first_attachment.payload.url
-        + ")");
+      gm(first_attachment.payload.url).size(function(err, value){
+        if (err !== null) {
+          sendTextMessage(senderID, "Got error: " + err);
+        } else {
+          sendTextMessage(senderID, "Image received ("
+            + first_attachment.payload.url
+            + ")");
+        }
+      });
     } else {
       sendTextMessage(senderID, "Message with attachment received");
     }
