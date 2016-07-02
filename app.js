@@ -208,8 +208,16 @@ function receivedMessage(event) {
       var transformed_url = cloudinary.url(senderID,
         { transformation:
           [
+            // Image size
             { width: 500 },
-            { overlay: "text:Arial_80:" + message }
+            // Text overlay
+            {
+              width: 480,
+              overlay: "text:Impact_80:" + message,
+              color: "#ffffff",
+              crop: "fit",
+              gravity: "north"
+            }
           ]
         }
       );
