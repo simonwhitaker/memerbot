@@ -315,6 +315,23 @@ function sendHelpMessage(recipientId) {
 }
 
 /*
+ * Send a text message using the Send API.
+ *
+ */
+function sendTextMessage(recipientId, messageText) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      text: messageText
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+/*
  * Send a button message using the Send API.
  *
  */
