@@ -1,7 +1,7 @@
 {
-  "name": "messenger-get-started",
+  "name": "memerbot",
   "version": "1.0.0",
-  "description": "Get started example for Messenger Platform",
+  "description": "Messenger Bot for creating memes",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -10,10 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://source.developers.google.com/p/messenger-get-started/r/default"
+    "url": "https://github.com/simonwhitaker/memerbot"
   },
-  "author": "Facebook",
-  "license": "ISC",
+  "author": "Simon Whitaker",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.0",
     "config": "^1.20.4",
@@ -21,6 +21,6 @@
     "request": "^2.72.0"
   },
   "engines": {
-    "node": "~4.1.2"
+    "node": "6.2.2"
   }
 }
