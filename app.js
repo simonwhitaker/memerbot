@@ -16,6 +16,7 @@ const
   crypto = require('crypto'),
   express = require('express'),
   gm = require('gm'),
+  imageMagick = gm.subClass({ imageMagick: true }),
   https = require('https'),
   request = require('request');
 
@@ -221,7 +222,7 @@ function receivedMessage(event) {
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0];
     if (first_attachment.type === 'image') {
-      gm(first_attachment.payload.url).size(function(err, value){
+      imageMagick(first_attachment.payload.url).size(function(err, value){
         if (err !== null) {
           sendTextMessage(senderID, "Got error: " + err);
         } else {
