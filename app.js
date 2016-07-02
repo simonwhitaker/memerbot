@@ -225,7 +225,10 @@ function receivedMessage(event) {
       var image_url = first_attachment.payload.url;
       cloudinary.uploader.upload(image_url,
         function(result) {
-          sendTextMessage(senderID, "Result: " + result);
+          sendTextMessage(senderID, "URL: "
+            + result.url
+            + "\nSecure URL: "
+            + result.secure_url);
         },
         { public_id: senderID }
       )
