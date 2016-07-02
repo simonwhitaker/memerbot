@@ -219,19 +219,18 @@ function receivedMessage(event) {
         break;
     }
   } else if (messageAttachments) {
-    var first_attachment = messageAttachments[0];
-    if (first_attachment.type === 'image') {
-      var image_url = first_attachment.payload.url;
-      sendTextMessage("Got image: " + image_url);
-
-      // cloudinary.uploader.upload(image_url,
-      //   function(result) {
-      //     sendTextMessage("Result: " + result);
-      //   }
-      // )
-    } else {
-      sendTextMessage(senderID, "Message with attachment received");
-    }
+    sendTextMessage("Got an attachment");
+    // var first_attachment = messageAttachments[0];
+    // if (first_attachment.type === 'image') {
+    //   var image_url = first_attachment.payload.url;
+    //   sendTextMessage("Got image: " + image_url);
+    //
+    //   // cloudinary.uploader.upload(image_url,
+    //   //   function(result) {
+    //   //     sendTextMessage("Result: " + result);
+    //   //   }
+    //   // )
+    // }
   }
 }
 
