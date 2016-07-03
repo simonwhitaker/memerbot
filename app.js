@@ -214,8 +214,12 @@ function receivedMessage(event) {
             // Text overlay
             {
               width: 480,
-              overlay: "text:Impact_80:" + message,
-              stroke: "stroke",
+              overlay: {
+                text: message,
+                font_family: "Impact",
+                font_size: 80,
+                stroke: "stroke",
+              },
               border: "2px_soid_black",
               color: "#ffffff",
               crop: "fit",
