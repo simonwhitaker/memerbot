@@ -20,6 +20,11 @@ const
   redis = require('redis'),
   request = require('request');
 
+const POSITION_TO_GRAVITY = {
+  top: 'north',
+  bottom: 'south'
+};
+
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 var app = express();
@@ -172,15 +177,15 @@ function receivedAuthentication(event) {
   sendTextMessage(senderID, "Authentication successful");
 }
 
-function parsePositionAndMessage(string) {
+function parseCommand(string) {
   string = string.trim();
   var spaceIndex = string.indexOf(' ');
   if (spaceIndex > 0) {
-    var pos = string.substr(0, spaceIndex).toLocaleLowerCase();
-    var msg = string.substr(spaceIndex + 1);
-    return {position: pos, message: msg};
+    var command = string.substr(0, spaceIndex).toLocaleLowerCase();
+    var args = string.substr(spaceIndex + 1);
+    return {command: command, args: args};
   }
-  return {position: string, message: null};
+  return {command: string, args: null};
 }
 
 /*
@@ -214,9 +219,9 @@ function receivedMessage(event) {
   var messageAttachments = message.attachments;
 
   if (messageText) {
-    var parseResult = parsePositionAndMessage(messageText);
-    if (parseResult.position) {
-      sendMemedImage(senderID, parseResult.position, parseResult.message);
+    var parseResult = parseCommand(messageText);
+    if (POSITION_TO_GRAVITY[parseResult.command]) {
+      sendMemedImage(senderID, parseResult.command, parseResult.args);
     } else {
       sendHelpMessage(senderID);
     }
@@ -242,16 +247,10 @@ function receivedMessage(event) {
   }
 }
 
-const POSITION_TO_GRAVITY = {
-  top: 'north',
-  bottom: 'south'
-};
-
 function sendMemedImage(senderID, position, message) {
-  if (POSITION_TO_GRAVITY[position] === null) {
-    sendHelpMessage(senderID);
-    return;
-  }
+  console.log("senderID: " + senderID
+    + ", position: " + position
+    + ", message: " + message);
 
   redisClient.get(senderID, function (err, reply) {
     console.log("redis get result: " + reply);
@@ -268,7 +267,7 @@ function sendMemedImage(senderID, position, message) {
       delete currentConfig[position];
     }
 
-    console.log(JSON.stringify(currentConfig));
+    console.log("currentConfig: " + JSON.stringify(currentConfig));
 
     var imageTransforms = [
       { width: 500}
