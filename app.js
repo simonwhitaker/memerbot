@@ -217,9 +217,11 @@ function receivedMessage (event) {
     var parseResult = parseCommand(messageText)
     if (POSITION_TO_GRAVITY[parseResult.command]) {
       sendMemedImage(senderID, parseResult.command, parseResult.args)
+    } else if (parseResult.command === 'help') {
+      sendHelpMessage(senderID)
     } else {
-      sendHelpMessage(senderID, parseResult.command +
-        ' isn\'t a recognised command.')
+      sendHelpMessage(senderID,
+        parseResult.command + ' isn\'t a recognised command.')
     }
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0]
