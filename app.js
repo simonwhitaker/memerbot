@@ -21,12 +21,14 @@ const
   request = require('request');
 
 const
+  CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id',
+  OUTPUT_WIDTH = 500,
   POSITION_TO_GRAVITY = {
     top: 'north',
     bottom: 'south'
   },
   STRINGS_KEY = 'strings',
-  CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id';
+  TEXT_PADDING = 10;
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
@@ -293,8 +295,14 @@ function sendMemedImage(senderID, position, message) {
 
       console.log("currentConfig: " + JSON.stringify(currentConfig));
 
+      // Magic function, arrived at empirically but seems to be about right.
+      var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(msg.length));
+      if (font_size > 60) {
+        font_size = 60;
+      }
+
       var imageTransforms = [
-        { width: 500}
+        { width: OUTPUT_WIDTH}
       ];
 
       var strings = currentConfig[STRINGS_KEY];
@@ -303,19 +311,19 @@ function sendMemedImage(senderID, position, message) {
           var gravity = POSITION_TO_GRAVITY[position];
           var message = encodeURIComponent(strings[position].toLocaleUpperCase());
           imageTransforms.push({
-            width: 480,
+            width: OUTPUT_WIDTH - TEXT_PADDING * 2,
             overlay: {
               text: message,
               font_family: "Impact",
-              font_size: 60,
+              font_size: font_size,
               text_align: "center",
               stroke: "stroke",
             },
-            border: "10px_solid_black",
+            border: "8px_solid_black",
             color: "#ffffff",
             crop: "fit",
             gravity: gravity,
-            y: 10,
+            y: TEXT_PADDING,
           });
         }
       }
