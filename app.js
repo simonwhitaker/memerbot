@@ -171,7 +171,7 @@ function receivedAuthentication(event) {
 
 function parsePositionAndMessage(string) {
   string = string.trim();
-  var spaceIndex = s.indexOf(' ');
+  var spaceIndex = string.indexOf(' ');
   if (spaceIndex > 0) {
     var pos = string.substr(0, spaceIndex).toLocaleLowerCase();
     var msg = string.substr(spaceIndex + 1);
