@@ -256,10 +256,10 @@ function sendMemedImage(senderID, position, message) {
   redisClient.get(senderID, function (err, reply) {
     console.log("redis get result: " + reply);
     console.log("redis get error: " + err);
-    
+
     var currentConfig = {}
     if (reply) {
-      currentConfig = reply;
+      currentConfig = JSON.parse(reply);
     };
 
     if (message) {
@@ -300,7 +300,7 @@ function sendMemedImage(senderID, position, message) {
     sendImageMessage(senderID, transformed_url);
 
     // Update the current currentConfig
-    redisClient.set(senderID, currentConfig);
+    redisClient.set(senderID, JSON.stringify(currentConfig));
   });
 }
 
