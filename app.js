@@ -254,6 +254,9 @@ function sendMemedImage(senderID, position, message) {
   }
 
   redisClient.get(senderID, function (err, reply) {
+    console.log("redis get result: " + reply);
+    console.log("redis get error: " + err);
+    
     var currentConfig = {}
     if (reply) {
       currentConfig = reply;
@@ -289,11 +292,11 @@ function sendMemedImage(senderID, position, message) {
       }
     }
 
-    var transformed_url = cloudinary.url(senderID,
-      {
-        transformation: imageTransforms
-      }
-    );
+    console.log("Image transforms: " + imageTransforms);
+
+    var transformed_url = cloudinary.url(senderID, {
+      transformation: imageTransforms
+    });
     sendImageMessage(senderID, transformed_url);
 
     // Update the current currentConfig
