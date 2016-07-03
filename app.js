@@ -223,7 +223,8 @@ function receivedMessage(event) {
     if (POSITION_TO_GRAVITY[parseResult.command]) {
       sendMemedImage(senderID, parseResult.command, parseResult.args);
     } else {
-      sendHelpMessage(senderID);
+      sendHelpMessage(senderID, parseResult.command
+        + " isn't a recognised command.");
     }
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0];
@@ -382,18 +383,15 @@ function sendImageMessage(recipientId, image_url) {
   callSendAPI(messageData);
 }
 
-function sendHelpMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: "Send an image to get started.\n"
-          + "Write 'top <text>' or 'bottom <text>' to add text."
-    }
-  };
+function sendHelpMessage(recipientId, errorMessage) {
+  var output = "";
+  if (errorMessage !== null) {
+    output = output + errorMessage + "\n\n";
+  }
+  output = output + "Send an image to get started.\n"
+    + "Write 'top <text>' or 'bottom <text>' to add text.";
 
-  callSendAPI(messageData);
+  sendTextMessage(output);
 }
 
 function sendTextMessage(recipientId, messageText) {
