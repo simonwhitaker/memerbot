@@ -306,7 +306,7 @@ function sendMemedImage(senderID, position, message) {
       // Update the current currentConfig
       redisClient.set(senderID, JSON.stringify(currentConfig));
     });
-  })(message, position);
+  }(message, position));
 }
 
 /*
