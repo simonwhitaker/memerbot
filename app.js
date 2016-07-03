@@ -276,7 +276,7 @@ function sendMemedImage(senderID, position, message) {
         return;
       }
 
-      if (currentConfig[STRINGS_KEY] === null) {
+      if (!(STRINGS_KEY in currentConfig)) {
         currentConfig[STRINGS_KEY] = {};
       }
 
