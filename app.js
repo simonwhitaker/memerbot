@@ -274,6 +274,7 @@ function sendMemedImage(senderID, position, message) {
       console.log("Current config: " + JSON.stringify(currentConfig));
 
       if (!(CLOUDINARY_PUBLIC_ID_KEY in currentConfig)) {
+        console.log("Couldn't find " + CLOUDINARY_PUBLIC_ID_KEY + " in " + JSON.stringify(currentConfig));
         sendHelpMessage(sndrID, "You need to upload an image first.");
         return;
       }
@@ -318,7 +319,7 @@ function sendMemedImage(senderID, position, message) {
 
       console.log("Image transforms: " + JSON.stringify(imageTransforms));
 
-      var transformed_url = cloudinary.url(senderID, {
+      var transformed_url = cloudinary.url(currentConfig[CLOUDINARY_PUBLIC_ID_KEY], {
         transformation: imageTransforms
       });
       sendImageMessage(senderID, transformed_url);
