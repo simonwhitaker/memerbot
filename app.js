@@ -180,7 +180,7 @@ function parsePositionAndMessage(string) {
     var msg = string.substr(spaceIndex + 1);
     return {position: pos, message: msg};
   }
-  return {position: null, message: string};
+  return {position: string, message: null};
 }
 
 /*
