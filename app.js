@@ -292,7 +292,7 @@ function sendMemedImage(senderID, position, message) {
       }
     }
 
-    console.log("Image transforms: " + imageTransforms);
+    console.log("Image transforms: " + JSON.stringify(imageTransforms));
 
     var transformed_url = cloudinary.url(senderID, {
       transformation: imageTransforms
