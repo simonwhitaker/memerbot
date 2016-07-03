@@ -324,6 +324,7 @@ function sendMemedImage(senderID, position, message) {
       var transformed_url = cloudinary.url(currentConfig[CLOUDINARY_PUBLIC_ID_KEY], {
         transformation: imageTransforms
       });
+      console.log("Got transformed URL: " + transformed_url); 
       sendImageMessage(senderID, transformed_url);
 
       // Update the current currentConfig
