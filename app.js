@@ -181,11 +181,11 @@ function parseCommand(string) {
   string = string.trim();
   var spaceIndex = string.indexOf(' ');
   if (spaceIndex > 0) {
-    var command = string.substr(0, spaceIndex).toLowerCase();
+    var command = string.substr(0, spaceIndex).toLocaleLowerCase();
     var args = string.substr(spaceIndex + 1);
     return {command: command, args: args};
   }
-  return {command: string, args: null};
+  return {command: string.toLocaleLowerCase(), args: null};
 }
 
 /*
