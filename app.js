@@ -257,13 +257,15 @@ function sendMemedImage(senderID, position, message) {
     console.log("redis get error: " + err);
 
     var currentConfig = {}
-    if (reply) {
+    if (reply !== null) {
       currentConfig = JSON.parse(reply);
     };
 
-    if (message) {
+    if (message !== null) {
+      console.log("Adding '" + message + "' to position: " + position);
       currentConfig[position] = message;
     } else {
+      console.log("Deleting message from position: " + position)
       delete currentConfig[position];
     }
 
