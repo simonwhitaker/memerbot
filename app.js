@@ -8,35 +8,32 @@
  */
 
 /* jshint node: true, devel: true */
-'use strict';
+'use strict'
 
-const
-  bodyParser = require('body-parser'),
-  cloudinary = require('cloudinary'),
-  config = require('config'),
-  crypto = require('crypto'),
-  express = require('express'),
-  https = require('https'),
-  redis = require('redis'),
-  request = require('request');
+const bodyParser = require('body-parser')
+const cloudinary = require('cloudinary')
+const config = require('config')
+const crypto = require('crypto')
+const express = require('express')
+const redis = require('redis')
+const request = require('request')
 
-const
-  CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id',
-  OUTPUT_WIDTH = 500,
-  POSITION_TO_GRAVITY = {
-    top: 'north',
-    bottom: 'south'
-  },
-  STRINGS_KEY = 'strings',
-  TEXT_PADDING = 10;
+const CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id'
+const OUTPUT_WIDTH = 500
+const POSITION_TO_GRAVITY = {
+  top: 'north',
+  bottom: 'south'
+}
+const STRINGS_KEY = 'strings'
+const TEXT_PADDING = 10
 
-var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
+var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
 
-var app = express();
+var app = express()
 
-app.set('port', process.env.PORT || 5000);
-app.use(bodyParser.json({ verify: verifyRequestSignature }));
-app.use(express.static('public'));
+app.set('port', process.env.PORT || 5000)
+app.use(bodyParser.json({ verify: verifyRequestSignature }))
+app.use(express.static('public'))
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -45,23 +42,23 @@ app.use(express.static('public'));
  */
 
 // App Secret can be retrieved from the App Dashboard
-const APP_SECRET = (process.env.MESSENGER_APP_SECRET) ?
-  process.env.MESSENGER_APP_SECRET :
-  config.get('appSecret');
+const APP_SECRET = (process.env.MESSENGER_APP_SECRET)
+  ? process.env.MESSENGER_APP_SECRET
+  : config.get('appSecret')
 
 // Arbitrary value used to validate a webhook
-const VALIDATION_TOKEN = (process.env.MESSENGER_VALIDATION_TOKEN) ?
-  (process.env.MESSENGER_VALIDATION_TOKEN) :
-  config.get('validationToken');
+const VALIDATION_TOKEN = (process.env.MESSENGER_VALIDATION_TOKEN)
+  ? (process.env.MESSENGER_VALIDATION_TOKEN)
+  : config.get('validationToken')
 
 // Generate a page access token for your page from the App Dashboard
-const PAGE_ACCESS_TOKEN = (process.env.MESSENGER_PAGE_ACCESS_TOKEN) ?
-  (process.env.MESSENGER_PAGE_ACCESS_TOKEN) :
-  config.get('pageAccessToken');
+const PAGE_ACCESS_TOKEN = (process.env.MESSENGER_PAGE_ACCESS_TOKEN)
+  ? (process.env.MESSENGER_PAGE_ACCESS_TOKEN)
+  : config.get('pageAccessToken')
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
-  console.error("Missing config values");
-  process.exit(1);
+  console.error('Missing config values')
+  process.exit(1)
 }
 
 /*
@@ -69,17 +66,16 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
  * setup is the same token used here.
  *
  */
-app.get('/webhook', function(req, res) {
+app.get('/webhook', function (req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
       req.query['hub.verify_token'] === VALIDATION_TOKEN) {
-    console.log("Validating webhook");
-    res.status(200).send(req.query['hub.challenge']);
+    console.log('Validating webhook')
+    res.status(200).send(req.query['hub.challenge'])
   } else {
-    console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);
+    console.error('Failed validation. Make sure the validation tokens match.')
+    res.sendStatus(403)
   }
-});
-
+})
 
 /*
  * All callbacks for Messenger are POST-ed. They will be sent to the same
@@ -89,39 +85,36 @@ app.get('/webhook', function(req, res) {
  *
  */
 app.post('/webhook', function (req, res) {
-  var data = req.body;
+  var data = req.body
 
   // Make sure this is a page subscription
-  if (data.object == 'page') {
+  if (data.object === 'page') {
     // Iterate over each entry
     // There may be multiple if batched
-    data.entry.forEach(function(pageEntry) {
-      var pageID = pageEntry.id;
-      var timeOfEvent = pageEntry.time;
-
+    data.entry.forEach(function (pageEntry) {
       // Iterate over each messaging event
-      pageEntry.messaging.forEach(function(messagingEvent) {
+      pageEntry.messaging.forEach(function (messagingEvent) {
         if (messagingEvent.optin) {
-          receivedAuthentication(messagingEvent);
+          receivedAuthentication(messagingEvent)
         } else if (messagingEvent.message) {
-          receivedMessage(messagingEvent);
+          receivedMessage(messagingEvent)
         } else if (messagingEvent.delivery) {
-          receivedDeliveryConfirmation(messagingEvent);
+          receivedDeliveryConfirmation(messagingEvent)
         } else if (messagingEvent.postback) {
-          receivedPostback(messagingEvent);
+          receivedPostback(messagingEvent)
         } else {
-          console.log("Webhook received unknown messagingEvent: ", messagingEvent);
+          console.log('Webhook received unknown messagingEvent: ', messagingEvent)
         }
-      });
-    });
+      })
+    })
 
     // Assume all went well.
     //
     // You must send back a 200, within 20 seconds, to let us know you've
     // successfully received the callback. Otherwise, the request will time out.
-    res.sendStatus(200);
+    res.sendStatus(200)
   }
-});
+})
 
 /*
  * Verify that the callback came from Facebook. Using the App Secret from
@@ -131,24 +124,23 @@ app.post('/webhook', function (req, res) {
  * https://developers.facebook.com/docs/graph-api/webhooks#setup
  *
  */
-function verifyRequestSignature(req, res, buf) {
-  var signature = req.headers["x-hub-signature"];
+function verifyRequestSignature (req, res, buf) {
+  var signature = req.headers['x-hub-signature']
 
   if (!signature) {
     // For testing, let's log an error. In production, you should throw an
     // error.
-    console.error("Couldn't validate the signature.");
+    console.error('Couldn\'t validate the signature.')
   } else {
-    var elements = signature.split('=');
-    var method = elements[0];
-    var signatureHash = elements[1];
+    var elements = signature.split('=')
+    var signatureHash = elements[1]
 
     var expectedHash = crypto.createHmac('sha1', APP_SECRET)
                         .update(buf)
-                        .digest('hex');
+                        .digest('hex')
 
-    if (signatureHash != expectedHash) {
-      throw new Error("Couldn't validate the request signature.");
+    if (signatureHash !== expectedHash) {
+      throw new Error('Couldn\'t validate the request signature.')
     }
   }
 }
@@ -156,41 +148,41 @@ function verifyRequestSignature(req, res, buf) {
 /*
  * Authorization Event
  *
- * The value for 'optin.ref' is defined in the entry point. For the "Send to
- * Messenger" plugin, it is the 'data-ref' field. Read more at
+ * The value for 'optin.ref' is defined in the entry point. For the 'Send to
+ * Messenger' plugin, it is the 'data-ref' field. Read more at
  * https://developers.facebook.com/docs/messenger-platform/webhook-reference#auth
  *
  */
-function receivedAuthentication(event) {
-  var senderID = event.sender.id;
-  var recipientID = event.recipient.id;
-  var timeOfAuth = event.timestamp;
+function receivedAuthentication (event) {
+  var senderID = event.sender.id
+  var recipientID = event.recipient.id
+  var timeOfAuth = event.timestamp
 
   // The 'ref' field is set in the 'Send to Messenger' plugin, in the 'data-ref'
   // The developer can set this to an arbitrary value to associate the
   // authentication callback with the 'Send to Messenger' click event. This is
   // a way to do account linking when the user clicks the 'Send to Messenger'
   // plugin.
-  var passThroughParam = event.optin.ref;
+  var passThroughParam = event.optin.ref
 
-  console.log("Received authentication for user %d and page %d with pass " +
-    "through param '%s' at %d", senderID, recipientID, passThroughParam,
-    timeOfAuth);
+  console.log('Received authentication for user %d and page %d with pass ' +
+    'through param \'%s\' at %d', senderID, recipientID, passThroughParam,
+    timeOfAuth)
 
   // When an authentication is received, we'll send a message back to the sender
   // to let them know it was successful.
-  sendTextMessage(senderID, "Authentication successful");
+  sendTextMessage(senderID, 'Authentication successful')
 }
 
-function parseCommand(string) {
-  string = string.trim();
-  var spaceIndex = string.indexOf(' ');
+function parseCommand (string) {
+  string = string.trim()
+  var spaceIndex = string.indexOf(' ')
   if (spaceIndex > 0) {
-    var command = string.substr(0, spaceIndex).toLocaleLowerCase();
-    var args = string.substr(spaceIndex + 1);
-    return {command: command, args: args};
+    var command = string.substr(0, spaceIndex).toLocaleLowerCase()
+    var args = string.substr(spaceIndex + 1)
+    return {command: command, args: args}
   }
-  return {command: string.toLocaleLowerCase(), args: null};
+  return {command: string.toLocaleLowerCase(), args: null}
 }
 
 /*
@@ -207,50 +199,49 @@ function parseCommand(string) {
  * then we'll simply confirm that we've received the attachment.
  *
  */
-function receivedMessage(event) {
-  var senderID = event.sender.id;
-  var recipientID = event.recipient.id;
-  var timeOfMessage = event.timestamp;
-  var message = event.message;
+function receivedMessage (event) {
+  var senderID = event.sender.id
+  var recipientID = event.recipient.id
+  var timeOfMessage = event.timestamp
+  var message = event.message
 
-  console.log("Received message for user %d and page %d at %d with message:",
-    senderID, recipientID, timeOfMessage);
-  console.log(JSON.stringify(message));
-
-  var messageId = message.mid;
+  console.log('Received message for user %d and page %d at %d with message: ',
+    senderID, recipientID, timeOfMessage)
+  console.log(JSON.stringify(message))
 
   // You may get a text or attachment but not both
-  var messageText = message.text;
-  var messageAttachments = message.attachments;
+  var messageText = message.text
+  var messageAttachments = message.attachments
 
   if (messageText) {
-    var parseResult = parseCommand(messageText);
+    var parseResult = parseCommand(messageText)
     if (POSITION_TO_GRAVITY[parseResult.command]) {
-      sendMemedImage(senderID, parseResult.command, parseResult.args);
+      sendMemedImage(senderID, parseResult.command, parseResult.args)
     } else {
-      sendHelpMessage(senderID, parseResult.command
-        + " isn't a recognised command.");
+      sendHelpMessage(senderID, parseResult.command +
+        ' isn\'t a recognised command.')
     }
   } else if (messageAttachments) {
-    var first_attachment = messageAttachments[0];
+    var first_attachment = messageAttachments[0]
     if (first_attachment.type === 'image') {
-      var image_url = first_attachment.payload.url;
+      var image_url = first_attachment.payload.url
       cloudinary.v2.uploader.upload(image_url,
-        function(error, result) {
-          var cloudinary_url = result.secure_url;
+        function (error, result) {
+          var cloudinary_url = result.secure_url
           if (cloudinary_url !== null) {
-            sendTextMessage(senderID, "Image received! "
-              + "Now use 'top <text>' or 'bottom <text>' to add text.");
+            sendTextMessage(senderID, 'Image received! ' +
+              'Now use \'top <text>\' or \'bottom <text>\' to add text.')
 
             // It's intentional that we overwrite existing text config here.
             // New image, new text, right?
-            var newConfig = {};
-            newConfig[CLOUDINARY_PUBLIC_ID_KEY] = result.public_id;
-            redisClient.set(senderID, JSON.stringify(newConfig));
-            console.log("Uploaded image with public ID " + result.public_id
-              + ", URL: ", result.url);
+            var newConfig = {}
+            newConfig[CLOUDINARY_PUBLIC_ID_KEY] = result.public_id
+            redisClient.set(senderID, JSON.stringify(newConfig))
+            console.log('Uploaded image with public ID ' +
+              result.public_id +
+              ', URL: ' + result.url)
           } else {
-            sendTextMessage(senderID, "Error uploading image: " + error);
+            sendTextMessage(senderID, 'Error uploading image: ' + error)
           }
         }
       )
@@ -258,88 +249,84 @@ function receivedMessage(event) {
   }
 }
 
-function sendMemedImage(senderID, position, message) {
-  console.log("senderID: " + senderID
-    + ", position: " + position
-    + ", message: " + message);
-
-  (function(sndrID, pos, msg) {
+function sendMemedImage (senderID, position, message) {
+  (function (sndrID, pos, msg) {
     redisClient.get(sndrID, function (err, reply) {
-      console.log("redis get result: " + reply);
-      console.log("redis get error: " + err);
+      console.log('redis get result: ' + reply)
+      console.log('redis get error: ' + err)
 
       var currentConfig = {}
       if (reply !== null) {
-        currentConfig = JSON.parse(reply);
-      };
+        currentConfig = JSON.parse(reply)
+      }
 
-      console.log("Current config: " + JSON.stringify(currentConfig));
+      console.log('Current config: ' + JSON.stringify(currentConfig))
 
       if (!(CLOUDINARY_PUBLIC_ID_KEY in currentConfig)) {
-        console.log("Couldn't find " + CLOUDINARY_PUBLIC_ID_KEY + " in " + JSON.stringify(currentConfig));
-        sendHelpMessage(sndrID, "You need to upload an image first.");
-        return;
+        console.log('Couldn\'t find ' + CLOUDINARY_PUBLIC_ID_KEY + ' in ' + JSON.stringify(currentConfig))
+        sendHelpMessage(sndrID, 'You need to upload an image first.')
+        return
       }
 
       if (!(STRINGS_KEY in currentConfig)) {
-        currentConfig[STRINGS_KEY] = {};
+        currentConfig[STRINGS_KEY] = {}
       }
 
       if (msg) {
-        console.log("Adding '" + msg + "' to position: " + pos);
-        currentConfig[STRINGS_KEY][pos] = msg;
+        console.log('Adding \'' + msg + '\' to position: ' + pos)
+        currentConfig[STRINGS_KEY][pos] = msg
       } else {
-        console.log("Deleting message from position: " + pos)
-        delete currentConfig[STRINGS_KEY][pos];
+        console.log('Deleting message from position: ' + pos)
+        delete currentConfig[STRINGS_KEY][pos]
       }
 
-      console.log("currentConfig: " + JSON.stringify(currentConfig));
+      console.log('currentConfig: ' + JSON.stringify(currentConfig))
 
       // Magic function, arrived at empirically but seems to be about right.
-      var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(msg.length));
+      var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(msg.length))
       if (font_size > 60) {
-        font_size = 60;
+        font_size = 60
       }
 
       var imageTransforms = [
-        { width: OUTPUT_WIDTH}
-      ];
+        { width: OUTPUT_WIDTH }
+      ]
 
-      var strings = currentConfig[STRINGS_KEY];
+      var strings = currentConfig[STRINGS_KEY]
       for (var position in strings) {
         if (strings.hasOwnProperty(position)) {
-          var gravity = POSITION_TO_GRAVITY[position];
-          var message = encodeURIComponent(strings[position].toLocaleUpperCase());
+          var gravity = POSITION_TO_GRAVITY[position]
+          var message = encodeURIComponent(strings[position].toLocaleUpperCase())
           imageTransforms.push({
-            width: OUTPUT_WIDTH - TEXT_PADDING * 2,
-            overlay: {
-              text: message,
-              font_family: "Impact",
-              font_size: font_size,
-              text_align: "center",
-              stroke: "stroke",
-            },
-            border: "8px_solid_black",
-            color: "#ffffff",
-            crop: "fit",
+            border: '8px_solid_black',
+            color: '#ffffff',
+            crop: 'fit',
             gravity: gravity,
-            y: TEXT_PADDING,
-          });
+            overlay: {
+              font_family: 'Impact',
+              font_size: font_size,
+              stroke: 'stroke',
+              text: message,
+              text_align: 'center'
+            },
+            width: OUTPUT_WIDTH - TEXT_PADDING * 2,
+            y: TEXT_PADDING
+          })
         }
       }
 
-      console.log("Image transforms: " + JSON.stringify(imageTransforms));
+      console.log('Image transforms: ' + JSON.stringify(imageTransforms))
 
       var transformed_url = cloudinary.url(currentConfig[CLOUDINARY_PUBLIC_ID_KEY], {
         transformation: imageTransforms
-      });
-      console.log("Got transformed URL: " + transformed_url); 
-      sendImageMessage(senderID, transformed_url);
+      })
+      console.log('Got transformed URL: ' + transformed_url)
+      sendImageMessage(senderID, transformed_url)
 
       // Update the current currentConfig
-      redisClient.set(senderID, JSON.stringify(currentConfig));
-    });
-  }(senderID, position, message));
+      redisClient.set(senderID, JSON.stringify(currentConfig))
+    })
+  }(senderID, position, message))
 }
 
 /*
@@ -349,24 +336,20 @@ function sendMemedImage(senderID, position, message) {
  * these fields at https://developers.facebook.com/docs/messenger-platform/webhook-reference#message_delivery
  *
  */
-function receivedDeliveryConfirmation(event) {
-  var senderID = event.sender.id;
-  var recipientID = event.recipient.id;
-  var delivery = event.delivery;
-  var messageIDs = delivery.mids;
-  var watermark = delivery.watermark;
-  var sequenceNumber = delivery.seq;
+function receivedDeliveryConfirmation (event) {
+  var delivery = event.delivery
+  var messageIDs = delivery.mids
+  var watermark = delivery.watermark
 
   if (messageIDs) {
-    messageIDs.forEach(function(messageID) {
-      console.log("Received delivery confirmation for message ID: %s",
-        messageID);
-    });
+    messageIDs.forEach(function (messageID) {
+      console.log('Received delivery confirmation for message ID: %s',
+        messageID)
+    })
   }
 
-  console.log("All message before %d were delivered.", watermark);
+  console.log('All message before %d were delivered.', watermark)
 }
-
 
 /*
  * Postback Event
@@ -375,58 +358,57 @@ function receivedDeliveryConfirmation(event) {
  * more at https://developers.facebook.com/docs/messenger-platform/webhook-reference#postback
  *
  */
-function receivedPostback(event) {
-  var senderID = event.sender.id;
-  var recipientID = event.recipient.id;
-  var timeOfPostback = event.timestamp;
+function receivedPostback (event) {
+  var senderID = event.sender.id
+  var recipientID = event.recipient.id
+  var timeOfPostback = event.timestamp
 
   // The 'payload' param is a developer-defined field which is set in a postback
   // button for Structured Messages.
-  var payload = event.postback.payload;
+  var payload = event.postback.payload
 
-  console.log("Received postback for user %d and page %d with payload '%s' " +
-    "at %d", senderID, recipientID, payload, timeOfPostback);
+  console.log('Received postback for user %d and page %d with payload \'%s\' ' +
+    'at %d', senderID, recipientID, payload, timeOfPostback)
 
   // When a postback is called, we'll send a message back to the sender to
   // let them know it was successful
-  sendTextMessage(senderID, "Postback called");
+  sendTextMessage(senderID, 'Postback called')
 }
-
 
 /*
  * Send a message with an using the Send API.
  *
  */
-function sendImageMessage(recipientId, image_url) {
+function sendImageMessage (recipientId, image_url) {
   var messageData = {
     recipient: {
       id: recipientId
     },
     message: {
       attachment: {
-        type: "image",
+        type: 'image',
         payload: {
           url: image_url
         }
       }
     }
-  };
-
-  callSendAPI(messageData);
-}
-
-function sendHelpMessage(recipientId, errorMessage) {
-  var output = "";
-  if (errorMessage !== null) {
-    output = output + errorMessage + "\n\n";
   }
-  output = output + "Send an image to get started.\n"
-    + "Write 'top <text>' or 'bottom <text>' to add text.";
 
-  sendTextMessage(recipientId, output);
+  callSendAPI(messageData)
 }
 
-function sendTextMessage(recipientId, messageText) {
+function sendHelpMessage (recipientId, errorMessage) {
+  var output = ''
+  if (errorMessage !== null) {
+    output = output + errorMessage + '\n\n'
+  }
+  output = output + 'Send an image to get started.\n' +
+    'Write \'top <text>\' or \'bottom <text>\' to add text.'
+
+  sendTextMessage(recipientId, output)
+}
+
+function sendTextMessage (recipientId, messageText) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -434,9 +416,9 @@ function sendTextMessage(recipientId, messageText) {
     message: {
       text: messageText
     }
-  };
+  }
 
-  callSendAPI(messageData);
+  callSendAPI(messageData)
 }
 
 /*
@@ -444,34 +426,32 @@ function sendTextMessage(recipientId, messageText) {
  * get the message id in a response
  *
  */
-function callSendAPI(messageData) {
+function callSendAPI (messageData) {
   request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    json: messageData,
     method: 'POST',
-    json: messageData
-
+    qs: { access_token: PAGE_ACCESS_TOKEN },
+    uri: 'https://graph.facebook.com/v2.6/me/messages'
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
+    if (!error && response.statusCode === 200) {
+      var recipientId = body.recipient_id
+      var messageId = body.message_id
 
-      console.log("Successfully sent generic message with id %s to recipient %s",
-        messageId, recipientId);
+      console.log('Successfully sent generic message with id %s to recipient %s',
+        messageId, recipientId)
     } else {
-      console.error("Unable to send message.");
-      console.error(response);
-      console.error(error);
+      console.error('Unable to send message.')
+      console.error(response)
+      console.error(error)
     }
-  });
+  })
 }
 
 // Start server
 // Webhooks must be available via SSL with a certificate signed by a valid
 // certificate authority.
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
+app.listen(app.get('port'), function () {
+  console.log('Node app is running on port', app.get('port'))
+})
 
-module.exports = app;
-
+module.exports = app
