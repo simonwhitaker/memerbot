@@ -236,16 +236,13 @@ function receivedMessage(event) {
 
 function sendMemedImage(senderID, message, position) {
   var gravity;
-  var y;
 
   switch(position) {
     case 'top':
       gravity = 'north';
-      y = 10;
       break;
     case 'bottom':
       gravity = 'south';
-      y = -10;
       break;
     default:
       sendTextMessage(senderID, 'Unknown position: ' + position);
@@ -272,7 +269,7 @@ function sendMemedImage(senderID, message, position) {
           color: "#ffffff",
           crop: "fit",
           gravity: gravity,
-          y: y,
+          y: 10,
         }
       ]
     }
