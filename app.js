@@ -308,6 +308,7 @@ function sendMemedImage(senderID, position, message) {
               text: message,
               font_family: "Impact",
               font_size: 60,
+              text_align: "center",
               stroke: "stroke",
             },
             border: "10px_solid_black",
