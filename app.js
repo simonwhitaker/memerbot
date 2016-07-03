@@ -242,9 +242,9 @@ function receivedMessage(event) {
 
             // It's intentional that we overwrite existing text config here.
             // New image, new text, right?
-            redisClient.set(senderID, JSON.stringify({
-              CLOUDINARY_PUBLIC_ID_KEY: result.public_id
-            }));
+            var newConfig = {};
+            newConfig[CLOUDINARY_PUBLIC_ID_KEY] = result.public_id;
+            redisClient.set(senderID, JSON.stringify(newConfig));
             console.log("Uploaded image with public ID " + result.public_id
               + ", URL: ", result.url);
           } else {
