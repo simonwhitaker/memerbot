@@ -261,7 +261,7 @@ function sendMemedImage(senderID, position, message) {
       currentConfig = JSON.parse(reply);
     };
 
-    if (message !== null) {
+    if (message) {
       console.log("Adding '" + message + "' to position: " + position);
       currentConfig[position] = message;
     } else {
