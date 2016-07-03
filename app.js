@@ -17,8 +17,7 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),
-  request = require('request'),
-  S = require('string');
+  request = require('request');
 
 var app = express();
 
@@ -170,6 +169,16 @@ function receivedAuthentication(event) {
   sendTextMessage(senderID, "Authentication successful");
 }
 
+function parsePositionAndMessage(string) {
+  string = string.trim();
+  var spaceIndex = s.indexOf(' ');
+  if (spaceIndex > 0) {
+    var pos = string.substr(0, spaceIndex).toLocaleLowerCase();
+    var msg = string.substr(spaceIndex + 1);
+    return {position: pos, message: msg};
+  }
+  return {position: null, message: string};
+}
 
 /*
  * Message Event
@@ -202,16 +211,10 @@ function receivedMessage(event) {
   var messageAttachments = message.attachments;
 
   if (messageText) {
-    var s = S(messageText);
-    if (s.startsWith('top ')) {
-      var message = s.chompLeft('top ');
-      sendMemedImage(senderID, message, 'top');
-    }
-    else if (s.startsWith('bottom')) {
-      var message = s.chompLeft('bottom ');
-      sendMemedImage(senderID, message, 'bottom');
-    }
-    else {
+    var parseResult = parsePositionAndMessage(messageText);
+    if (parseResult.position) {
+      sendMemedImage(senderID, parseResult.position, parseResult.message);
+    } else {
       sendHelpMessage(senderID);
     }
   } else if (messageAttachments) {
@@ -234,7 +237,7 @@ function receivedMessage(event) {
   }
 }
 
-function sendMemedImage(senderID, message, position) {
+function sendMemedImage(senderID, position, message) {
   var gravity;
 
   switch(position) {
@@ -250,7 +253,7 @@ function sendMemedImage(senderID, message, position) {
       return;
   }
 
-  message = encodeURIComponent(message.toUpperCase());
+  message = encodeURIComponent(message.toLocaleUpperCase());
   var transformed_url = cloudinary.url(senderID,
     {
       transformation: [
