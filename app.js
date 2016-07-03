@@ -20,10 +20,13 @@ const
   redis = require('redis'),
   request = require('request');
 
-const POSITION_TO_GRAVITY = {
-  top: 'north',
-  bottom: 'south'
-};
+const
+  POSITION_TO_GRAVITY = {
+    top: 'north',
+    bottom: 'south'
+  },
+  STRINGS_KEY = 'strings',
+  CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id';
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
@@ -231,16 +234,21 @@ function receivedMessage(event) {
     if (first_attachment.type === 'image') {
       var image_url = first_attachment.payload.url;
       cloudinary.v2.uploader.upload(image_url,
-        { public_id: senderID },
         function(error, result) {
           var cloudinary_url = result.secure_url;
           if (cloudinary_url !== null) {
             sendTextMessage(senderID, "Image received! "
               + "Now use 'top <text>' or 'bottom <text>' to add text.");
-            // Clear existing text config
-            redisClient.del(senderID);
+
+            // It's intentional that we overwrite existing text config here.
+            // New image, new text, right?
+            redisClient.set(JSON.stringify({
+              CLOUDINARY_PUBLIC_ID_KEY: result.public_id
+            }));
+            console.log("Uploaded image with public ID " + result.public_id
+              + ", URL: ", result.url);
           } else {
-            sendTextMessage(senderID, "Error: " + error);
+            sendTextMessage(senderID, "Error uploading image: " + error);
           }
         }
       )
@@ -253,8 +261,8 @@ function sendMemedImage(senderID, position, message) {
     + ", position: " + position
     + ", message: " + message);
 
-  (function(pos, msg) {
-    redisClient.get(senderID, function (err, reply) {
+  (function(sndrID, pos, msg) {
+    redisClient.get(sndrID, function (err, reply) {
       console.log("redis get result: " + reply);
       console.log("redis get error: " + err);
 
@@ -263,12 +271,21 @@ function sendMemedImage(senderID, position, message) {
         currentConfig = JSON.parse(reply);
       };
 
+      if (currentConfig[CLOUDINARY_PUBLIC_ID_KEY] === null) {
+        sendHelpMessage(sndrID, "You need to upload an image first.");
+        return;
+      }
+
+      if (currentConfig[STRINGS_KEY] === null) {
+        currentConfig[STRINGS_KEY] = {};
+      }
+
       if (msg) {
         console.log("Adding '" + msg + "' to position: " + pos);
-        currentConfig[pos] = msg;
+        currentConfig[STRINGS_KEY][pos] = msg;
       } else {
         console.log("Deleting message from position: " + pos)
-        delete currentConfig[pos];
+        delete currentConfig[STRINGS_KEY][pos];
       }
 
       console.log("currentConfig: " + JSON.stringify(currentConfig));
@@ -276,7 +293,7 @@ function sendMemedImage(senderID, position, message) {
       var imageTransforms = [
         { width: 500}
       ];
-      for (var position in currentConfig) {
+      for (var position in currentConfig[STRINGS_KEY]) {
         if (currentConfig.hasOwnProperty(position)) {
           var gravity = POSITION_TO_GRAVITY[position];
           var message = encodeURIComponent(currentConfig[position].toLocaleUpperCase());
@@ -307,7 +324,7 @@ function sendMemedImage(senderID, position, message) {
       // Update the current currentConfig
       redisClient.set(senderID, JSON.stringify(currentConfig));
     });
-  }(position, message));
+  }(senderID, position, message));
 }
 
 /*
