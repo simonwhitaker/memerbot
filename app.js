@@ -402,7 +402,7 @@ function sendImageMessage (recipientId, image_url) {
 
 function sendHelpMessage (recipientId, errorMessage) {
   var output = ''
-  if (!errorMessage) {
+  if (errorMessage) {
     output = output + errorMessage + '\n\n'
   }
   output = output + 'Send an image to get started.\n' +
