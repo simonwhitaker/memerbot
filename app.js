@@ -252,8 +252,8 @@ function sendMemedImage(senderID, message, position) {
 
   message = encodeURIComponent(message.toUpperCase());
   var transformed_url = cloudinary.url(senderID,
-    { transformation:
-      [
+    {
+      transformation: [
         // Image size
         { width: 500 },
         // Text overlay
