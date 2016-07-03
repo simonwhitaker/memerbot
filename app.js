@@ -220,10 +220,11 @@ function receivedMessage(event) {
                 font_size: 80,
                 stroke: "stroke",
               },
-              border: "2px_soid_black",
+              border: "10px_solid_black",
               color: "#ffffff",
               crop: "fit",
-              gravity: "north"
+              gravity: "north",
+              y: 10,
             }
           ]
         }
