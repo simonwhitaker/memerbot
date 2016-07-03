@@ -252,59 +252,61 @@ function sendMemedImage(senderID, position, message) {
     + ", position: " + position
     + ", message: " + message);
 
-  redisClient.get(senderID, function (err, reply) {
-    console.log("redis get result: " + reply);
-    console.log("redis get error: " + err);
+  (function(message, position) {
+    redisClient.get(senderID, function (err, reply) {
+      console.log("redis get result: " + reply);
+      console.log("redis get error: " + err);
 
-    var currentConfig = {}
-    if (reply !== null) {
-      currentConfig = JSON.parse(reply);
-    };
+      var currentConfig = {}
+      if (reply !== null) {
+        currentConfig = JSON.parse(reply);
+      };
 
-    if (message) {
-      console.log("Adding '" + message + "' to position: " + position);
-      currentConfig[position] = message;
-    } else {
-      console.log("Deleting message from position: " + position)
-      delete currentConfig[position];
-    }
-
-    console.log("currentConfig: " + JSON.stringify(currentConfig));
-
-    var imageTransforms = [
-      { width: 500}
-    ];
-    for (var position in currentConfig) {
-      if (currentConfig.hasOwnProperty(position)) {
-        var gravity = POSITION_TO_GRAVITY[position];
-        var message = encodeURIComponent(currentConfig[position].toLocaleUpperCase());
-        imageTransforms.push({
-          width: 480,
-          overlay: {
-            text: message,
-            font_family: "Impact",
-            font_size: 60,
-            stroke: "stroke",
-          },
-          border: "10px_solid_black",
-          color: "#ffffff",
-          crop: "fit",
-          gravity: gravity,
-          y: 10,
-        });
+      if (message) {
+        console.log("Adding '" + message + "' to position: " + position);
+        currentConfig[position] = message;
+      } else {
+        console.log("Deleting message from position: " + position)
+        delete currentConfig[position];
       }
-    }
 
-    console.log("Image transforms: " + JSON.stringify(imageTransforms));
+      console.log("currentConfig: " + JSON.stringify(currentConfig));
 
-    var transformed_url = cloudinary.url(senderID, {
-      transformation: imageTransforms
+      var imageTransforms = [
+        { width: 500}
+      ];
+      for (var position in currentConfig) {
+        if (currentConfig.hasOwnProperty(position)) {
+          var gravity = POSITION_TO_GRAVITY[position];
+          var message = encodeURIComponent(currentConfig[position].toLocaleUpperCase());
+          imageTransforms.push({
+            width: 480,
+            overlay: {
+              text: message,
+              font_family: "Impact",
+              font_size: 60,
+              stroke: "stroke",
+            },
+            border: "10px_solid_black",
+            color: "#ffffff",
+            crop: "fit",
+            gravity: gravity,
+            y: 10,
+          });
+        }
+      }
+
+      console.log("Image transforms: " + JSON.stringify(imageTransforms));
+
+      var transformed_url = cloudinary.url(senderID, {
+        transformation: imageTransforms
+      });
+      sendImageMessage(senderID, transformed_url);
+
+      // Update the current currentConfig
+      redisClient.set(senderID, JSON.stringify(currentConfig));
     });
-    sendImageMessage(senderID, transformed_url);
-
-    // Update the current currentConfig
-    redisClient.set(senderID, JSON.stringify(currentConfig));
-  });
+  })(message, position);
 }
 
 /*
