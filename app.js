@@ -282,12 +282,6 @@ function sendMemedImage (senderID, position, message) {
 
       console.log('currentConfig: ' + JSON.stringify(currentConfig))
 
-      // Magic function, arrived at empirically but seems to be about right.
-      var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(msg.length))
-      if (font_size > 60) {
-        font_size = 60
-      }
-
       var imageTransforms = [
         { width: OUTPUT_WIDTH }
       ]
@@ -297,6 +291,13 @@ function sendMemedImage (senderID, position, message) {
         if (strings.hasOwnProperty(position)) {
           var gravity = POSITION_TO_GRAVITY[position]
           var message = encodeURIComponent(strings[position].toLocaleUpperCase())
+
+          // Magic function, arrived at empirically but seems to be about right.
+          var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(message.length))
+          if (font_size > 60) {
+            font_size = 60
+          }
+
           imageTransforms.push({
             border: '8px_solid_black',
             color: '#ffffff',
