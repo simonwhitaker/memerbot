@@ -405,8 +405,9 @@ function sendHelpMessage (recipientId, errorMessage) {
   if (errorMessage) {
     output = output + errorMessage + '\n\n'
   }
-  output = output + 'Send an image to get started.\n' +
-    'Write \'top <text>\' or \'bottom <text>\' to add text.'
+  output = output +
+    'Send me an image to get started. Animated GIFs work too!\n\n' +
+    'Then send me \'top <text>\' or \'bottom <text>\' to add text.'
 
   sendTextMessage(recipientId, output)
 }
