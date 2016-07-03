@@ -271,7 +271,7 @@ function sendMemedImage(senderID, position, message) {
         currentConfig = JSON.parse(reply);
       };
 
-      if (currentConfig[CLOUDINARY_PUBLIC_ID_KEY] === null) {
+      if (!(CLOUDINARY_PUBLIC_ID_KEY in currentConfig)) {
         sendHelpMessage(sndrID, "You need to upload an image first.");
         return;
       }
