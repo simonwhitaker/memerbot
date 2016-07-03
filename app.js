@@ -205,34 +205,11 @@ function receivedMessage(event) {
     var s = S(messageText);
     if (s.startsWith('top ')) {
       var message = s.chompLeft('top ');
-      message = encodeURIComponent(message.toUpperCase());
-      var transformed_url = cloudinary.url(senderID,
-        { transformation:
-          [
-            // Image size
-            { width: 500 },
-            // Text overlay
-            {
-              width: 480,
-              overlay: {
-                text: message,
-                font_family: "Impact",
-                font_size: 80,
-                stroke: "stroke",
-              },
-              border: "10px_solid_black",
-              color: "#ffffff",
-              crop: "fit",
-              gravity: "north",
-              y: 10,
-            }
-          ]
-        }
-      );
-      sendImageMessage(senderID, transformed_url);
+      sendMemedImage(senderID, message, 'top');
     }
     else if (s.startsWith('bottom')) {
       var message = s.chompLeft('bottom ');
+      sendMemedImage(senderID, message, 'bottom');
     }
     else {
       sendHelpMessage(senderID);
@@ -257,6 +234,52 @@ function receivedMessage(event) {
   }
 }
 
+function sendMemedImage(senderID, message, position) {
+  var gravity;
+  var y;
+
+  switch(position) {
+    case 'top':
+      gravity = 'north';
+      y = 10;
+      break;
+    case 'bottom':
+      gravity = 'south';
+      y = -10;
+      break;
+    default:
+      sendTextMessage(senderID, 'Unknown position: ' + position);
+      sendHelpMessage(senderID);
+      return;
+  }
+
+  message = encodeURIComponent(message.toUpperCase());
+  var transformed_url = cloudinary.url(senderID,
+    { transformation:
+      [
+        // Image size
+        { width: 500 },
+        // Text overlay
+        {
+          width: 480,
+          overlay: {
+            text: message,
+            font_family: "Impact",
+            font_size: 60,
+            stroke: "stroke",
+          },
+          border: "10px_solid_black",
+          color: "#ffffff",
+          crop: "fit",
+          gravity: gravity,
+          y: y,
+        }
+      ]
+    }
+  );
+  sendImageMessage(senderID, transformed_url);
+
+}
 
 /*
  * Delivery Confirmation Event
