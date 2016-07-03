@@ -17,7 +17,10 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),
+  redis = require('redis'),
   request = require('request');
+
+var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 var app = express();
 
@@ -227,7 +230,9 @@ function receivedMessage(event) {
           var cloudinary_url = result.secure_url;
           if (cloudinary_url !== null) {
             sendTextMessage(senderID, "Image received! "
-              + "Now use 'top <text>' or 'bottom <text>' to add text");
+              + "Now use 'top <text>' or 'bottom <text>' to add text.");
+            // Clear existing text config
+            redisClient.del(senderID);
           } else {
             sendTextMessage(senderID, "Error: " + error);
           }
@@ -237,30 +242,37 @@ function receivedMessage(event) {
   }
 }
 
-function sendMemedImage(senderID, position, message) {
-  var gravity;
+const POSITION_TO_GRAVITY = {
+  top: 'north',
+  bottom: 'south'
+};
 
-  switch(position) {
-    case 'top':
-      gravity = 'north';
-      break;
-    case 'bottom':
-      gravity = 'south';
-      break;
-    default:
-      sendTextMessage(senderID, 'Unknown position: ' + position);
-      sendHelpMessage(senderID);
-      return;
+function sendMemedImage(senderID, position, message) {
+  if (POSITION_TO_GRAVITY[position] === null) {
+    sendHelpMessage(senderID);
+    return;
   }
 
-  message = encodeURIComponent(message.toLocaleUpperCase());
-  var transformed_url = cloudinary.url(senderID,
-    {
-      transformation: [
-        // Image size
-        { width: 500 },
-        // Text overlay
-        {
+  redisClient.get(senderID, function (err, reply) {
+    var currentConfig = {}
+    if (reply) {
+      currentConfig = reply;
+    };
+
+    if (message) {
+      currentConfig[position] = message;
+    } else {
+      delete currentConfig[position];
+    }
+
+    var imageTransforms = [
+      { width: 500}
+    ];
+    for (var position in currentConfig) {
+      if (currentConfig.hasOwnProperty(position)) {
+        var gravity = POSITION_TO_GRAVITY[position];
+        var message = encodeURIComponent(currentConfig[position].toLocaleUpperCase());
+        imageTransforms.push({
           width: 480,
           overlay: {
             text: message,
@@ -273,11 +285,20 @@ function sendMemedImage(senderID, position, message) {
           crop: "fit",
           gravity: gravity,
           y: 10,
-        }
-      ]
+        });
+      }
     }
-  );
-  sendImageMessage(senderID, transformed_url);
+
+    var transformed_url = cloudinary.url(senderID,
+      {
+        transformation: imageTransforms
+      }
+    );
+    sendImageMessage(senderID, transformed_url);
+
+    // Update the current currentConfig
+    redisClient.set(senderID, currentConfig);
+  });
 }
 
 /*
@@ -360,7 +381,7 @@ function sendHelpMessage(recipientId) {
     },
     message: {
       text: "Send an image to get started.\n"
-          + "Write 'top <text>' or 'bottom <text>' to set text."
+          + "Write 'top <text>' or 'bottom <text>' to add text."
     }
   };
 
