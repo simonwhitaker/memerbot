@@ -252,7 +252,7 @@ function sendMemedImage(senderID, position, message) {
     + ", position: " + position
     + ", message: " + message);
 
-  (function(message, position) {
+  (function(pos, msg) {
     redisClient.get(senderID, function (err, reply) {
       console.log("redis get result: " + reply);
       console.log("redis get error: " + err);
@@ -262,12 +262,12 @@ function sendMemedImage(senderID, position, message) {
         currentConfig = JSON.parse(reply);
       };
 
-      if (message) {
-        console.log("Adding '" + message + "' to position: " + position);
-        currentConfig[position] = message;
+      if (msg) {
+        console.log("Adding '" + msg + "' to position: " + pos);
+        currentConfig[pos] = msg;
       } else {
-        console.log("Deleting message from position: " + position)
-        delete currentConfig[position];
+        console.log("Deleting message from position: " + pos)
+        delete currentConfig[pos];
       }
 
       console.log("currentConfig: " + JSON.stringify(currentConfig));
@@ -306,7 +306,7 @@ function sendMemedImage(senderID, position, message) {
       // Update the current currentConfig
       redisClient.set(senderID, JSON.stringify(currentConfig));
     });
-  }(message, position));
+  }(position, message));
 }
 
 /*
