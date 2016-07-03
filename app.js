@@ -296,10 +296,12 @@ function sendMemedImage(senderID, position, message) {
       var imageTransforms = [
         { width: 500}
       ];
-      for (var position in currentConfig[STRINGS_KEY]) {
-        if (currentConfig.hasOwnProperty(position)) {
+
+      var strings = currentConfig[STRINGS_KEY];
+      for (var position in strings) {
+        if (strings.hasOwnProperty(position)) {
           var gravity = POSITION_TO_GRAVITY[position];
-          var message = encodeURIComponent(currentConfig[position].toLocaleUpperCase());
+          var message = encodeURIComponent(strings[position].toLocaleUpperCase());
           imageTransforms.push({
             width: 480,
             overlay: {
