@@ -362,7 +362,7 @@ function sendHelpMessage(recipientId) {
     },
     message: {
       text: "Send an image to get started.\n"
-          + "Write top <text> or bottom <text> to set text."
+          + "Write 'top <text>' or 'bottom <text>' to set text."
     }
   };
 
