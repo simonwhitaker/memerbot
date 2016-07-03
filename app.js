@@ -391,7 +391,7 @@ function sendHelpMessage(recipientId, errorMessage) {
   output = output + "Send an image to get started.\n"
     + "Write 'top <text>' or 'bottom <text>' to add text.";
 
-  sendTextMessage(output);
+  sendTextMessage(recipientId, output);
 }
 
 function sendTextMessage(recipientId, messageText) {
