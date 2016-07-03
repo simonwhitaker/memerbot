@@ -268,6 +268,8 @@ function sendMemedImage(senderID, position, message) {
       delete currentConfig[position];
     }
 
+    console.log(JSON.stringify(currentConfig));
+
     var imageTransforms = [
       { width: 500}
     ];
