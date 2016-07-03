@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-present, Facebook, Inc.
+ * Copyright 2016-present, Simon Whitaker
  * All rights reserved.
  *
  * This source code is licensed under the license found in the
@@ -226,8 +226,8 @@ function receivedMessage(event) {
         function(error, result) {
           var cloudinary_url = result.secure_url;
           if (cloudinary_url !== null) {
-            sendTextMessage(senderID, "Image received!");
-            sendTextMessage(senderID, "Now use 'top <text>' or 'bottom <text>' to add text");
+            sendTextMessage(senderID, "Image received! "
+              + "Now use 'top <text>' or 'bottom <text>' to add text");
           } else {
             sendTextMessage(senderID, "Error: " + error);
           }
@@ -278,7 +278,6 @@ function sendMemedImage(senderID, position, message) {
     }
   );
   sendImageMessage(senderID, transformed_url);
-
 }
 
 /*
@@ -354,10 +353,6 @@ function sendImageMessage(recipientId, image_url) {
   callSendAPI(messageData);
 }
 
-/*
- * Send a text message using the Send API.
- *
- */
 function sendHelpMessage(recipientId) {
   var messageData = {
     recipient: {
@@ -372,10 +367,6 @@ function sendHelpMessage(recipientId) {
   callSendAPI(messageData);
 }
 
-/*
- * Send a text message using the Send API.
- *
- */
 function sendTextMessage(recipientId, messageText) {
   var messageData = {
     recipient: {
@@ -383,38 +374,6 @@ function sendTextMessage(recipientId, messageText) {
     },
     message: {
       text: messageText
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-/*
- * Send a button message using the Send API.
- *
- */
-function sendButtonMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "button",
-          text: "This is test text",
-          buttons:[{
-            type: "web_url",
-            url: "https://www.oculus.com/en-us/rift/",
-            title: "Open Web URL"
-          }, {
-            type: "postback",
-            title: "Call Postback",
-            payload: "Developer defined postback"
-          }]
-        }
-      }
     }
   };
 
