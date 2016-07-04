@@ -215,17 +215,18 @@ function receivedMessage (event) {
 
   if (messageText) {
     var parseResult = parseCommand(messageText)
-    if (POSITION_TO_GRAVITY[parseResult.command]) {
-      sendMemedImage(senderID, parseResult.command, parseResult.args)
-    } else if (parseResult.command === 'help') {
+    var command = parseResult.command.replace(/\W/g, '')
+    if (POSITION_TO_GRAVITY[command]) {
+      sendMemedImage(senderID, command, parseResult.args)
+    } else if (command === 'help') {
       sendHelpMessage(senderID)
-    } else if (parseResult.command === 'hello') {
+    } else if (command === 'hello') {
       sendHelpMessage(senderID, 'Hello yourself!')
-    } else if (parseResult.command === 'hi') {
+    } else if (command === 'hi') {
       sendHelpMessage(senderID, 'Oh, hi!')
     } else {
       sendHelpMessage(senderID,
-        'Hmm, I don\'t know what ' + parseResult.command + ' means.')
+        'Hmm, I don\'t know what that means.')
     }
   } else if (messageAttachments) {
     var first_attachment = messageAttachments[0]
