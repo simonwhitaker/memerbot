@@ -21,13 +21,11 @@ const request = require('request')
 const memer = require('./memer')
 
 const CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id'
-const OUTPUT_WIDTH = 500
 const POSITION_TO_GRAVITY = {
   top: 'north',
   bottom: 'south'
 }
 const STRINGS_KEY = 'strings'
-const TEXT_PADDING = 10
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
 
