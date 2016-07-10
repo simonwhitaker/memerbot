@@ -17,7 +17,7 @@ const OUTPUT_WIDTH = 500
 const MAX_FONT_SIZE = 60
 const POSITION_TO_GRAVITY = {
   top: 'north',
-  DEFAULT_POSITION: 'south'
+  bottom: 'south'
 }
 const TEXT_PADDING = 10
 
