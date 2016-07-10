@@ -18,6 +18,8 @@ const express = require('express')
 const redis = require('redis')
 const request = require('request')
 
+const memer = require('./memer')
+
 const CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id'
 const OUTPUT_WIDTH = 500
 const POSITION_TO_GRAVITY = {
@@ -289,45 +291,14 @@ function sendMemedImage (senderID, position, message) {
 
       console.log('currentConfig: ' + JSON.stringify(currentConfig))
 
-      var imageTransforms = [
-        { width: OUTPUT_WIDTH }
-      ]
-
       var strings = currentConfig[STRINGS_KEY]
-      for (var position in strings) {
-        if (strings.hasOwnProperty(position)) {
-          var gravity = POSITION_TO_GRAVITY[position]
-          var message = encodeURIComponent(strings[position].toLocaleUpperCase())
 
-          // Magic function, arrived at empirically but seems to be about right.
-          var font_size = Math.round(OUTPUT_WIDTH / 4 - 20 * Math.log(message.length))
-          if (font_size > 60) {
-            font_size = 60
-          }
+      var transformed_url = memer.getMemeUrl(
+        currentConfig[CLOUDINARY_PUBLIC_ID_KEY],
+        strings['top'],
+        strings['bottom']
+      )
 
-          imageTransforms.push({
-            border: '8px_solid_black',
-            color: '#ffffff',
-            crop: 'fit',
-            gravity: gravity,
-            overlay: {
-              font_family: 'Impact',
-              font_size: font_size,
-              stroke: 'stroke',
-              text: message,
-              text_align: 'center'
-            },
-            width: OUTPUT_WIDTH - TEXT_PADDING * 2,
-            y: TEXT_PADDING
-          })
-        }
-      }
-
-      console.log('Image transforms: ' + JSON.stringify(imageTransforms))
-
-      var transformed_url = cloudinary.url(currentConfig[CLOUDINARY_PUBLIC_ID_KEY], {
-        transformation: imageTransforms
-      })
       console.log('Got transformed URL: ' + transformed_url)
       sendImageMessage(senderID, transformed_url)
 
