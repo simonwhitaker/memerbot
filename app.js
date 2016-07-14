@@ -104,7 +104,8 @@ app.post('/upload-image', function (req, res) {
   cloudinary.v2.uploader.upload(
     req.files.image.file,
     {
-      public_id: image_id
+      public_id: image_id,
+      invalidate: true
     },
     function (error, result) {
       var cloudinary_url = result.secure_url
