@@ -41,8 +41,9 @@ function redisClient() {
 var app = express()
 
 app.set('port', process.env.PORT || 5000)
+app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
-app.use(express.static('public'))
+app.use('/static', express.static('public'))
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -69,6 +70,10 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error('Missing config values')
   process.exit(1)
 }
+
+app.get('/', function (req, res) {
+  res.render('index', {})
+})
 
 /*
  * Use your own validation token. Check that the token used in the Webhook

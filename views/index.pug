@@ -1,0 +1,33 @@
+html
+  head
+    title Memer Bot
+    script(type='text/javascript').
+      var timeout_id = null
+      function updateImage() {
+        if (timeout_id !== null) {
+          clearTimeout(timeout_id)
+        }
+        timeout_id = setTimeout(_updateImage, 500)
+      }
+
+      function _updateImage() {
+        var top_text = document.getElementById('top-text').value
+        var bottom_text = document.getElementById('bottom-text').value
+        console.log('Got top "%s", bottom "%s"', top_text, bottom_text)
+        var image = document.getElementById('meme')
+
+      }
+  body
+    h1 Memer Bot
+    - var image_url = 'https://imgflip.com/s/meme/Troll-Face.jpg'
+    img#meme(src=image_url width=500)
+    .text-wrapper
+      input#top-text.meme-text(
+        placeholder="Top text"
+        oninput='updateImage()'
+      )
+    .text-wrapper
+      input#bottom-text.meme-text(
+        placeholder="Bottom text"
+        oninput='updateImage()'
+      )
