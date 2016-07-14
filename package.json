@@ -19,6 +19,7 @@
     "cloudinary": "1.4.1",
     "config": "^1.20.4",
     "express": "^4.13.4",
+    "express-busboy": "3.0.0",
     "pug": "2.0.0-beta3",
     "redis": "2.6.2",
     "request": "^2.72.0"

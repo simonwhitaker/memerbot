@@ -11,6 +11,7 @@
 'use strict'
 
 const bodyParser = require('body-parser')
+const busboy = require('express-busboy')
 const cloudinary = require('cloudinary')
 const config = require('config')
 const crypto = require('crypto')
@@ -31,7 +32,7 @@ const STRINGS_KEY = 'strings'
 const USER_UPLOAD_TAG = 'user-upload'
 
 var _redisClient
-function redisClient() {
+function redisClient () {
   if (_redisClient === null) {
     _redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
   }
@@ -44,6 +45,8 @@ app.set('port', process.env.PORT || 5000)
 app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use('/static', express.static('public'))
+
+busboy.extend(app, { upload: true })
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -76,9 +79,9 @@ app.get('/', function (req, res) {
 })
 
 app.get('/meme', function (req, res) {
-  var image_id = req.query['image_id']
-  var top_text = decodeURIComponent(req.query['top_text'])
-  var bottom_text = decodeURIComponent(req.query['bottom_text'])
+  var image_id = req.query['image-id']
+  var top_text = decodeURIComponent(req.query['top-text'])
+  var bottom_text = decodeURIComponent(req.query['bottom-text'])
   if (image_id && image_id.length > 0) {
     var transformed_url = memer.getMemeUrl(
       image_id,
@@ -88,10 +91,33 @@ app.get('/meme', function (req, res) {
     res.status(200).send({
       image_url: transformed_url
     })
+  } else {
+    res.status(400).send({
+      error: 'Missing image-id parameter'
+    })
   }
-  res.status(400).send({
-    error: 'Missing image_id parameter'
-  })
+})
+
+app.post('/upload-image', function (req, res) {
+  var image_id = req.body['image-id']
+  console.log('Image ID: %s', image_id)
+  cloudinary.v2.uploader.upload(
+    req.files.image.file,
+    {
+      public_id: image_id
+    },
+    function (error, result) {
+      var cloudinary_url = result.secure_url
+      if (cloudinary_url !== null) {
+        console.log('Uploaded image with public ID ' +
+          result.public_id +
+          ', URL: ' + result.url)
+      } else {
+        console.error('[ERROR] On uploading file: %s', error)
+      }
+      res.redirect('/')
+    }
+  )
 })
 
 /*

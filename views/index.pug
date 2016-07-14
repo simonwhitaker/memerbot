@@ -1,33 +1,59 @@
 html
   head
     title Memer Bot
+    style(type='text/css').
+      * {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      }
+    script(
+      type='text/javascript'
+      src='https://code.jquery.com/jquery-3.1.0.min.js'
+    )
     script(type='text/javascript').
+      const IMAGE_FETCH_DELAY_MS = 200
+      const IMAGE_ID = 'index'
       var timeout_id = null
+
       function updateImage() {
         if (timeout_id !== null) {
           clearTimeout(timeout_id)
         }
-        timeout_id = setTimeout(_updateImage, 500)
+        timeout_id = setTimeout(_updateImage, IMAGE_FETCH_DELAY_MS)
       }
 
       function _updateImage() {
-        var top_text = document.getElementById('top-text').value
-        var bottom_text = document.getElementById('bottom-text').value
+        var top_text = encodeURIComponent($('#top-text').val())
+        var bottom_text = encodeURIComponent($('#bottom-text').val())
         console.log('Got top "%s", bottom "%s"', top_text, bottom_text)
-        var image = document.getElementById('meme')
-
+        $.getJSON('/meme', {
+          'image-id': IMAGE_ID,
+          'top-text': top_text,
+          'bottom-text': bottom_text
+        }, function(res) {
+          $('#meme').attr('src', res.image_url)
+        })
       }
+      $(document).ready(function(){
+        $('#image-id').val(IMAGE_ID)
+        _updateImage()
+      })
   body
     h1 Memer Bot
-    - var image_url = 'https://imgflip.com/s/meme/Troll-Face.jpg'
-    img#meme(src=image_url width=500)
-    .text-wrapper
-      input#top-text.meme-text(
-        placeholder="Top text"
-        oninput='updateImage()'
-      )
-    .text-wrapper
-      input#bottom-text.meme-text(
-        placeholder="Bottom text"
-        oninput='updateImage()'
-      )
+    .meme-generator
+      img#meme(width=300)
+      .text-wrapper
+        input#top-text.meme-text(
+          placeholder="Top text"
+          oninput='updateImage()'
+        )
+      .text-wrapper
+        input#bottom-text.meme-text(
+          placeholder="Bottom text"
+          oninput='updateImage()'
+        )
+    div
+      h2 Upload new image
+      form(action='/upload-image' method='POST' enctype='multipart/form-data')
+        input(type='file' name='image')
+        input(type='hidden' name='image-id' id='image-id')
+        input(type='submit' value='Upload')

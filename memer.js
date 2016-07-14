@@ -70,7 +70,7 @@ exports.getMemeUrl = (cloudinary_public_id, top_string, bottom_string) => {
     transformation: transforms
   })
 
-  console.log('Image transforms: ' + JSON.stringify(transforms))
+  // console.log('Image transforms: ' + JSON.stringify(transforms))
 
   return transformed_url
 }
