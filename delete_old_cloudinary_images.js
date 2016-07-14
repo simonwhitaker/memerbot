@@ -12,12 +12,14 @@
 
 const cloudinary = require('cloudinary')
 const MAX_AGE_DAYS = 3
+const USER_UPLOAD_TAG = 'user-upload'
 
 function fetch_and_process (cursor) {
   cloudinary.v2.api.resources(
     {
       max_results: 50,
-      next_cursor: cursor
+      next_cursor: cursor,
+      tags: [USER_UPLOAD_TAG]
     },
     function (error, result) {
       if (error) {
