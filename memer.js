@@ -14,18 +14,23 @@ const cloudinary = require('cloudinary')
 
 const DEFAULT_POSITION = 'bottom'
 const OUTPUT_WIDTH = 500
-const MAX_FONT_SIZE = 60
 const POSITION_TO_GRAVITY = {
   top: 'north',
   bottom: 'south'
 }
 const TEXT_PADDING = 10
 
+// Font size constants
+const STRING_LENGTH_FACTOR = 20
+const WIDTH_MULTIPLIER = 0.25
+
 function getFontSize (string, max_width) {
-  var font_size = Math.round(max_width / 4 - 20 * Math.log(string.length))
-  if (font_size > MAX_FONT_SIZE) {
-    font_size = MAX_FONT_SIZE
+  var max_font_size = max_width / 12
+  var font_size = Math.round(max_width * WIDTH_MULTIPLIER - STRING_LENGTH_FACTOR * Math.log(string.length))
+  if (font_size > max_font_size) {
+    font_size = max_font_size
   }
+  console.log('Font size: %s', font_size)
   return font_size
 }
 
