@@ -235,7 +235,11 @@ function receivedMessage (event) {
     var first_attachment = messageAttachments[0]
     if (first_attachment.type === 'image') {
       var image_url = first_attachment.payload.url
-      cloudinary.v2.uploader.upload(image_url,
+      cloudinary.v2.uploader.upload(
+        image_url,
+        {
+          tags: [USER_UPLOAD_TAG]
+        },
         function (error, result) {
           var cloudinary_url = result.secure_url
           if (cloudinary_url !== null) {
@@ -253,9 +257,6 @@ function receivedMessage (event) {
           } else {
             sendTextMessage(senderID, 'Error uploading image: ' + error)
           }
-        },
-        {
-          tags: [USER_UPLOAD_TAG]
         }
       )
     }
