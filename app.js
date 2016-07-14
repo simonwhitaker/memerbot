@@ -27,6 +27,9 @@ const POSITION_TO_GRAVITY = {
 }
 const STRINGS_KEY = 'strings'
 
+// Used to differentiate user uploads from other images
+const USER_UPLOAD_TAG = 'user-upload'
+
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
 
 var app = express()
@@ -250,6 +253,9 @@ function receivedMessage (event) {
           } else {
             sendTextMessage(senderID, 'Error uploading image: ' + error)
           }
+        },
+        {
+          tags: [USER_UPLOAD_TAG]
         }
       )
     }
