@@ -30,7 +30,13 @@ const STRINGS_KEY = 'strings'
 // Used to differentiate user uploads from other images
 const USER_UPLOAD_TAG = 'user-upload'
 
-var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
+var _redisClient
+function redisClient() {
+  if (_redisClient === null) {
+    _redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
+  }
+  return _redisClient
+}
 
 var app = express()
 
@@ -250,7 +256,7 @@ function receivedMessage (event) {
             // New image, new text, right?
             var newConfig = {}
             newConfig[CLOUDINARY_PUBLIC_ID_KEY] = result.public_id
-            redisClient.set(senderID, JSON.stringify(newConfig))
+            redisClient().set(senderID, JSON.stringify(newConfig))
             console.log('Uploaded image with public ID ' +
               result.public_id +
               ', URL: ' + result.url)
@@ -265,7 +271,7 @@ function receivedMessage (event) {
 
 function sendMemedImage (senderID, position, message) {
   (function (sndrID, pos, msg) {
-    redisClient.get(sndrID, function (err, reply) {
+    redisClient().get(sndrID, function (err, reply) {
       console.log('redis get result: ' + reply)
       console.log('redis get error: ' + err)
 
@@ -308,7 +314,7 @@ function sendMemedImage (senderID, position, message) {
       sendImageMessage(senderID, transformed_url)
 
       // Update the current currentConfig
-      redisClient.set(senderID, JSON.stringify(currentConfig))
+      redisClient().set(senderID, JSON.stringify(currentConfig))
     })
   }(senderID, position, message))
 }
