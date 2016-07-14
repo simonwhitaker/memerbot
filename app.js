@@ -75,6 +75,25 @@ app.get('/', function (req, res) {
   res.render('index', {})
 })
 
+app.get('/meme', function (req, res) {
+  var image_id = req.query['image_id']
+  var top_text = decodeURIComponent(req.query['top_text'])
+  var bottom_text = decodeURIComponent(req.query['bottom_text'])
+  if (image_id && image_id.length > 0) {
+    var transformed_url = memer.getMemeUrl(
+      image_id,
+      top_text,
+      bottom_text
+    )
+    res.status(200).send({
+      image_url: transformed_url
+    })
+  }
+  res.status(400).send({
+    error: 'Missing image_id parameter'
+  })
+})
+
 /*
  * Use your own validation token. Check that the token used in the Webhook
  * setup is the same token used here.
