@@ -37,7 +37,7 @@ var app = express()
 app.set('port', process.env.PORT || 5000)
 app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
-app.use('/static', express.static('public'))
+app.use(express.static('public'))
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -64,59 +64,6 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error('Missing config values')
   process.exit(1)
 }
-
-app.get('/', function (req, res) {
-  res.render('index', {})
-})
-
-app.get('/meme', function (req, res) {
-  var image_id = req.query['image-id']
-  var top_text = decodeURIComponent(req.query['top-text'])
-  var bottom_text = decodeURIComponent(req.query['bottom-text'])
-  if (image_id && image_id.length > 0) {
-    var transformed_url = memer.getMemeUrl(
-      image_id,
-      top_text,
-      bottom_text
-    )
-    res.status(200).send({
-      image_url: transformed_url
-    })
-  } else {
-    res.status(400).send({
-      error: 'Missing image-id parameter'
-    })
-  }
-})
-
-app.post('/upload-image', function (req, res) {
-  res.status(500).send('Needs fixing')
-  return
-
-  // TODO: Fix this; removed busbuy integration since it interfered with
-  // abiltiy of /webhook POST handler to read request body.
-
-  // var image_id = req.body['image-id']
-  // console.log('Image ID: %s', image_id)
-  // cloudinary.v2.uploader.upload(
-  //   req.files.image.file,
-  //   {
-  //     public_id: image_id,
-  //     invalidate: true
-  //   },
-  //   function (error, result) {
-  //     var cloudinary_url = result.secure_url
-  //     if (cloudinary_url !== null) {
-  //       console.log('Uploaded image with public ID ' +
-  //         result.public_id +
-  //         ', URL: ' + result.url)
-  //     } else {
-  //       console.error('[ERROR] On uploading file: %s', error)
-  //     }
-  //     res.redirect('/')
-  //   }
-  // )
-})
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
