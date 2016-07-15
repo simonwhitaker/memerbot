@@ -46,7 +46,7 @@ app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use('/static', express.static('public'))
 
-busboy.extend(app, { upload: true })
+// busboy.extend(app, { upload: true })
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -105,7 +105,7 @@ app.post('/upload-image', function (req, res) {
     req.files.image.file,
     {
       public_id: image_id,
-      invalidate: true
+      invalidate: true,
     },
     function (error, result) {
       var cloudinary_url = result.secure_url
