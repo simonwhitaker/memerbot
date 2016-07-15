@@ -30,7 +30,6 @@ function getFontSize (string, max_width) {
   if (font_size > max_font_size) {
     font_size = max_font_size
   }
-  console.log('Font size: %s', font_size)
   return font_size
 }
 
