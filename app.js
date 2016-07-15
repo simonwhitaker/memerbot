@@ -46,7 +46,7 @@ app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use('/static', express.static('public'))
 
-// busboy.extend(app, { upload: true })
+busboy.extend(app, { upload: true })
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -105,7 +105,7 @@ app.post('/upload-image', function (req, res) {
     req.files.image.file,
     {
       public_id: image_id,
-      invalidate: true,
+      invalidate: true
     },
     function (error, result) {
       var cloudinary_url = result.secure_url
@@ -146,6 +146,10 @@ app.get('/webhook', function (req, res) {
  */
 app.post('/webhook', function (req, res) {
   var data = req.body
+  if (!data) {
+    res.status(400).send('Unable to parse request body')
+    return
+  }
 
   // Make sure this is a page subscription
   if (data.object === 'page') {
@@ -173,6 +177,12 @@ app.post('/webhook', function (req, res) {
     // You must send back a 200, within 20 seconds, to let us know you've
     // successfully received the callback. Otherwise, the request will time out.
     res.sendStatus(200)
+  } else {
+    res.status(400).send({
+      message: 'Unexpected data object found',
+      expected: 'page',
+      received: data.object
+    })
   }
 })
 
