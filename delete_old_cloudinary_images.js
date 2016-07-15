@@ -5,6 +5,13 @@
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  *
+ * To run:
+ *
+ *   heroku local:run node delete_old_cloudinary_images.js
+ *
+ * To run against a specific env:
+ *
+ *   heroku local:run --env .env.production node delete_old_cloudinary_images.js
  */
 
 /* jshint node: true, devel: true */
