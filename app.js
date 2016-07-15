@@ -11,7 +11,6 @@
 'use strict'
 
 const bodyParser = require('body-parser')
-const busboy = require('express-busboy')
 const cloudinary = require('cloudinary')
 const config = require('config')
 const crypto = require('crypto')
@@ -45,8 +44,6 @@ app.set('port', process.env.PORT || 5000)
 app.set('view engine', 'pug')
 app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use('/static', express.static('public'))
-
-busboy.extend(app, { upload: true })
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -99,26 +96,32 @@ app.get('/meme', function (req, res) {
 })
 
 app.post('/upload-image', function (req, res) {
-  var image_id = req.body['image-id']
-  console.log('Image ID: %s', image_id)
-  cloudinary.v2.uploader.upload(
-    req.files.image.file,
-    {
-      public_id: image_id,
-      invalidate: true
-    },
-    function (error, result) {
-      var cloudinary_url = result.secure_url
-      if (cloudinary_url !== null) {
-        console.log('Uploaded image with public ID ' +
-          result.public_id +
-          ', URL: ' + result.url)
-      } else {
-        console.error('[ERROR] On uploading file: %s', error)
-      }
-      res.redirect('/')
-    }
-  )
+  res.status(500).send('Needs fixing')
+  return
+
+  // TODO: Fix this; removed busbuy integration since it interfered with
+  // abiltiy of /webhook POST handler to read request body.
+
+  // var image_id = req.body['image-id']
+  // console.log('Image ID: %s', image_id)
+  // cloudinary.v2.uploader.upload(
+  //   req.files.image.file,
+  //   {
+  //     public_id: image_id,
+  //     invalidate: true
+  //   },
+  //   function (error, result) {
+  //     var cloudinary_url = result.secure_url
+  //     if (cloudinary_url !== null) {
+  //       console.log('Uploaded image with public ID ' +
+  //         result.public_id +
+  //         ', URL: ' + result.url)
+  //     } else {
+  //       console.error('[ERROR] On uploading file: %s', error)
+  //     }
+  //     res.redirect('/')
+  //   }
+  // )
 })
 
 /*
@@ -181,7 +184,7 @@ app.post('/webhook', function (req, res) {
     res.status(400).send({
       message: 'Unexpected data object found',
       expected: 'page',
-      received: data.object
+      received: String(data.object)
     })
   }
 })
