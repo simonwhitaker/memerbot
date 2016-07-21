@@ -19,7 +19,10 @@
 const cloudinary = require('cloudinary')
 const express = require('express')
 const busboy = require('express-busboy')
+const fs = require('fs')
 const memer = require('./memer')
+
+const IMAGE_ID_FILE = '.memer-preview-image-id'
 
 var app = express()
 
@@ -29,12 +32,28 @@ app.use('/static', express.static('public'))
 
 busboy.extend(app, { upload: true })
 
+function getImageId () {
+  try {
+    return fs.readFileSync(IMAGE_ID_FILE)
+  } catch (e) {
+    return null
+  }
+}
+
+function setImageid (image_id) {
+  fs.writeFile(IMAGE_ID_FILE, image_id, function (err) {
+    if (err) {
+      console.error('On writing image ID to file: ' + err)
+    }
+  })
+}
+
 app.get('/', function (req, res) {
   res.render('index', {})
 })
 
 app.get('/meme', function (req, res) {
-  var image_id = req.query['image-id']
+  var image_id = getImageId()
   var top_text = decodeURIComponent(req.query['top-text'])
   var bottom_text = decodeURIComponent(req.query['bottom-text'])
   if (image_id && image_id.length > 0) {
@@ -54,20 +73,29 @@ app.get('/meme', function (req, res) {
 })
 
 app.post('/upload-image', function (req, res) {
-  var image_id = req.body['image-id']
-  console.log('Image ID: %s', image_id)
+  var old_image_id = getImageId()
+  if (old_image_id && old_image_id.length > 0) {
+    console.log('Deleting image ID: ' + old_image_id)
+    cloudinary.v2.api.delete_resources(
+      [old_image_id],
+      function (error, result) {
+        if (error) {
+          console.error('On deleting images: %s', error.message)
+        } else {
+          console.log(result)
+        }
+      }
+    )
+  }
   cloudinary.v2.uploader.upload(
     req.files.image.file,
-    {
-      public_id: image_id,
-      invalidate: true
-    },
     function (error, result) {
       var cloudinary_url = result.secure_url
       if (cloudinary_url !== null) {
         console.log('Uploaded image with public ID ' +
           result.public_id +
           ', URL: ' + result.url)
+        setImageid(result.public_id)
       } else {
         console.error('[ERROR] On uploading file: %s', error)
       }
