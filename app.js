@@ -286,7 +286,8 @@ function setStockImage (senderID, imageID) {
   redisClient.set(senderID, JSON.stringify(currentConfig))
 
   // Let them see what they chose
-  sendMemedImage(senderID)
+  var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
+  sendImageMessage(senderID, transformed_url)
 }
 
 function sendMemedImage (senderID, position, message) {
@@ -312,14 +313,12 @@ function sendMemedImage (senderID, position, message) {
         currentConfig[STRINGS_KEY] = {}
       }
 
-      if (pos) {
-        if (msg) {
-          console.log('Adding \'' + msg + '\' to position: ' + pos)
-          currentConfig[STRINGS_KEY][pos] = msg
-        } else {
-          console.log('Deleting message from position: ' + pos)
-          delete currentConfig[STRINGS_KEY][pos]
-        }
+      if (msg) {
+        console.log('Adding \'' + msg + '\' to position: ' + pos)
+        currentConfig[STRINGS_KEY][pos] = msg
+      } else {
+        console.log('Deleting message from position: ' + pos)
+        delete currentConfig[STRINGS_KEY][pos]
       }
 
       console.log('currentConfig: ' + JSON.stringify(currentConfig))
@@ -331,8 +330,6 @@ function sendMemedImage (senderID, position, message) {
         strings['top'],
         strings['bottom']
       )
-
-      console.log('Got transformed URL: ' + transformed_url)
       sendImageMessage(senderID, transformed_url)
 
       // Update the current currentConfig

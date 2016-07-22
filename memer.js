@@ -74,5 +74,7 @@ exports.getMemeUrl = (cloudinary_public_id, top_string, bottom_string) => {
     transformation: transforms
   })
 
+  console.log('Got transformed URL: %s', transformed_url)
+
   return transformed_url
 }
