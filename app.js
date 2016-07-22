@@ -282,7 +282,7 @@ function setStockImage (senderID, imageID) {
   }
 
   var currentConfig = {}
-  currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = imageID
+  currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
   redisClient.set(senderID, JSON.stringify(currentConfig))
 
   // Let them see what they chose
