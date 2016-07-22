@@ -12,3 +12,4 @@ npm-debug.log
 Dockerfile
 docker-compose.yml
 config/local.json
+.memer-preview-image-id
