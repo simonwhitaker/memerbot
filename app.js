@@ -232,6 +232,8 @@ function receivedMessage (event) {
     var command = parseResult.command.replace(/\W/g, '')
     if (POSITION_TO_GRAVITY[command]) {
       sendMemedImage(senderID, command, parseResult.args)
+    } else if (command === 'stock') {
+      setStockImage(senderID, parseResult.args)
     } else if (command === 'help') {
       sendHelpMessage(senderID)
     } else if (command === 'hello') {
@@ -272,6 +274,26 @@ function receivedMessage (event) {
       )
     }
   }
+}
+
+function setStockImage (senderID, imageID) {
+  if (!imageID || imageID.length == 0) {
+    // TODO: send list of stock images
+  }
+
+  (function (sndrID, imgID) {
+    redisClient.get(sndrID, function (err, reply) {
+      var currentConfig = {}
+      if (reply !== null) {
+        currentConfig = JSON.parse(reply)
+      }
+
+      currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
+
+      // Update the current currentConfig
+      redisClient.set(senderID, JSON.stringify(currentConfig))
+    })
+  }(senderID, imageID))
 }
 
 function sendMemedImage (senderID, position, message) {
