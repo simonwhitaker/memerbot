@@ -281,19 +281,12 @@ function setStockImage (senderID, imageID) {
     // TODO: send list of stock images
   }
 
-  (function (sndrID, imgID) {
-    redisClient.get(sndrID, function (err, reply) {
-      var currentConfig = {}
-      if (reply !== null) {
-        currentConfig = JSON.parse(reply)
-      }
+  var currentConfig = {}
+  currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = imageID
+  redisClient.set(senderID, JSON.stringify(currentConfig))
 
-      currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
-
-      // Update the current currentConfig
-      redisClient.set(senderID, JSON.stringify(currentConfig))
-    })
-  }(senderID, imageID))
+  // Let them see what they chose
+  sendMemedImage(senderID)
 }
 
 function sendMemedImage (senderID, position, message) {
@@ -319,12 +312,14 @@ function sendMemedImage (senderID, position, message) {
         currentConfig[STRINGS_KEY] = {}
       }
 
-      if (msg) {
-        console.log('Adding \'' + msg + '\' to position: ' + pos)
-        currentConfig[STRINGS_KEY][pos] = msg
-      } else {
-        console.log('Deleting message from position: ' + pos)
-        delete currentConfig[STRINGS_KEY][pos]
+      if (pos) {
+        if (msg) {
+          console.log('Adding \'' + msg + '\' to position: ' + pos)
+          currentConfig[STRINGS_KEY][pos] = msg
+        } else {
+          console.log('Deleting message from position: ' + pos)
+          delete currentConfig[STRINGS_KEY][pos]
+        }
       }
 
       console.log('currentConfig: ' + JSON.stringify(currentConfig))
