@@ -278,7 +278,7 @@ function receivedMessage (event) {
 }
 
 function setStockImage (senderID, imageID) {
-  if (imageID && imageID.length == 0) {
+  if (imageID && imageID.length > 0) {
     var currentConfig = {}
     currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
     redisClient.set(senderID, JSON.stringify(currentConfig))
