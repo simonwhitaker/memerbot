@@ -25,6 +25,7 @@ const POSITION_TO_GRAVITY = {
   top: 'north',
   bottom: 'south'
 }
+const STOCK_IMAGE_PREFIX = 'stock/'
 const STRINGS_KEY = 'strings'
 
 // Used to differentiate user uploads from other images
@@ -277,17 +278,45 @@ function receivedMessage (event) {
 }
 
 function setStockImage (senderID, imageID) {
-  if (!imageID || imageID.length == 0) {
-    // TODO: send list of stock images
+  if (imageID && imageID.length == 0) {
+    var currentConfig = {}
+    currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
+    redisClient.set(senderID, JSON.stringify(currentConfig))
+
+    // Let them see what they chose
+    var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
+    sendImageMessage(senderID, transformed_url)
+  } else {
+    (function (sndrID){
+      cloudinary.v2.api.resources(
+        {
+          type: 'upload',
+          prefix: STOCK_IMAGE_PREFIX,
+          max_results: 100
+        },
+        function (error, result) {
+          if (error) {
+            console.error(error.message)
+          } else {
+            var image_ids = []
+            for (var resource of result.resources) {
+              // do something with resource.public_id,
+              var image_id = resource.public_id.substring(
+                STOCK_IMAGE_PREFIX.length
+              )
+              image_ids.push(image_id)
+            }
+            image_ids.sort()
+            var output = 'Choose from:\n'
+            for (var image_id of image_ids) {
+              output = output + '\n' + image_id
+            }
+            sendTextMessage(sndrID, output)
+          }
+        }
+      )
+    }(senderID))
   }
-
-  var currentConfig = {}
-  currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
-  redisClient.set(senderID, JSON.stringify(currentConfig))
-
-  // Let them see what they chose
-  var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
-  sendImageMessage(senderID, transformed_url)
 }
 
 function sendMemedImage (senderID, position, message) {
