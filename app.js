@@ -21,6 +21,7 @@ const request = require('request')
 const memer = require('./memer')
 
 const CLOUDINARY_PUBLIC_ID_KEY = 'cloudinary_public_id'
+const MAX_MESSAGE_LENGTH = 320
 const POSITION_TO_GRAVITY = {
   top: 'north',
   bottom: 'south'
@@ -309,9 +310,17 @@ function setStockImage (senderID, imageID) {
             image_ids.sort()
             var output = 'Choose from:\n'
             for (var img_id of image_ids) {
-              output = output + '\n' + img_id
+              var new_output = output + '\n' + img_id
+              if (new_output.length <= MAX_MESSAGE_LENGTH) {
+                output = new_output
+              } else {
+                sendTextMessage(sndrID, output)
+                output = img_id
+              }
             }
-            sendTextMessage(sndrID, output)
+            if (output.length > 0) {
+              sendTextMessage(sndrID, output)
+            }
           }
         }
       )
