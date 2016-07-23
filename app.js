@@ -481,7 +481,9 @@ function enqueueMessage(messageData) {
  *
  */
 function _processMessageQueue () {
-  if (messageQueue.length == 0) {
+  console.log('Current queue length: ' + messageQueue.length)
+  if (messageQueue.length === 0) {
+    console.log('Queue is empty, nothing to do.')
     return
   }
   var messageData = messageQueue.shift()
