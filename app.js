@@ -312,7 +312,7 @@ function setStockImage (senderID, imageID) {
             image_ids.sort()
             var output = 'Send me \'stock <name>\' to use a stock image.\n\n' +
               'For example:\n\n' +
-              '  stock ancientaliens\n\n'
+              '  stock ancientaliens\n\n' +
               'Choose from:\n'
             for (var img_id of image_ids) {
               var new_output = output + '\n' + img_id
