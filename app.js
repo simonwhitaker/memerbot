@@ -287,7 +287,7 @@ function setStockImage (senderID, imageID) {
     var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
     sendImageMessage(senderID, transformed_url)
   } else {
-    (function (sndrID){
+    (function (sndrID) {
       cloudinary.v2.api.resources(
         {
           type: 'upload',
@@ -308,8 +308,8 @@ function setStockImage (senderID, imageID) {
             }
             image_ids.sort()
             var output = 'Choose from:\n'
-            for (var image_id of image_ids) {
-              output = output + '\n' + image_id
+            for (var img_id of image_ids) {
+              output = output + '\n' + img_id
             }
             sendTextMessage(sndrID, output)
           }
