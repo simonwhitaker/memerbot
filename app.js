@@ -260,8 +260,7 @@ function receivedMessage (event) {
         function (error, result) {
           var cloudinary_url = result.secure_url
           if (cloudinary_url !== null) {
-            sendTextMessage(senderID, 'Image received! ' +
-              'Now use \'top <text>\' or \'bottom <text>\' to add text.')
+            sendInstructionsForNewImage(senderID)
 
             // It's intentional that we overwrite existing text config here.
             // New image, new text, right?
@@ -280,6 +279,13 @@ function receivedMessage (event) {
   }
 }
 
+function sendInstructionsForNewImage (senderID) {
+  sendTextMessage(
+    senderID,
+    'Now use \'top <text>\' or \'bottom <text>\' to add text.'
+  )
+}
+
 function setStockImage (senderID, imageID) {
   if (imageID && imageID.length > 0) {
     var currentConfig = {}
@@ -289,6 +295,7 @@ function setStockImage (senderID, imageID) {
     // Let them see what they chose
     var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
     sendImageMessage(senderID, transformed_url)
+    sendInstructionsForNewImage(senderID)
   } else {
     (function (sndrID) {
       cloudinary.v2.api.resources(
