@@ -33,6 +33,7 @@ const STRINGS_KEY = 'strings'
 const USER_UPLOAD_TAG = 'user-upload'
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
+var messageQueue = []
 
 var app = express()
 
@@ -441,7 +442,7 @@ function sendImageMessage (recipientId, image_url) {
     }
   }
 
-  callSendAPI(messageData)
+  enqueueMessage(messageData)
 }
 
 function sendHelpMessage (recipientId, errorMessage) {
@@ -466,7 +467,12 @@ function sendTextMessage (recipientId, messageText) {
     }
   }
 
-  callSendAPI(messageData)
+  enqueueMessage(messageData)
+}
+
+function enqueueMessage(messageData) {
+  messageQueue.push(messageData)
+  _processMessageQueue()
 }
 
 /*
@@ -474,7 +480,11 @@ function sendTextMessage (recipientId, messageText) {
  * get the message id in a response
  *
  */
-function callSendAPI (messageData) {
+function _processMessageQueue () {
+  if (messageQueue.length == 0) {
+    return
+  }
+  var messageData = messageQueue.shift()
   request({
     json: messageData,
     method: 'POST',
@@ -492,6 +502,7 @@ function callSendAPI (messageData) {
       console.error(response)
       console.error(error)
     }
+    _processMessageQueue()
   })
 }
 
