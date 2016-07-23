@@ -310,7 +310,10 @@ function setStockImage (senderID, imageID) {
               image_ids.push(image_id)
             }
             image_ids.sort()
-            var output = 'Choose from:\n'
+            var output = 'Send me \'stock <name>\' to use a stock image.\n\n' +
+              'For example:\n\n' +
+              '  stock ancientaliens\n\n'
+              'Choose from:\n'
             for (var img_id of image_ids) {
               var new_output = output + '\n' + img_id
               if (new_output.length <= MAX_MESSAGE_LENGTH) {
@@ -453,7 +456,8 @@ function sendHelpMessage (recipientId, errorMessage) {
   }
   output = output +
     'Send me an image to get started. Animated GIFs work too!\n\n' +
-    'Then send me \'top <text>\' or \'bottom <text>\' to add text.'
+    'Then send me \'top <text>\' or \'bottom <text>\' to add text.\n\n' +
+    'Or send \'stock\' to see stock images.'
 
   sendTextMessage(recipientId, output)
 }
@@ -471,7 +475,7 @@ function sendTextMessage (recipientId, messageText) {
   enqueueMessage(messageData)
 }
 
-function enqueueMessage(messageData) {
+function enqueueMessage (messageData) {
   messageQueue.push(messageData)
   _processMessageQueue()
 }
