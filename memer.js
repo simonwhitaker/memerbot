@@ -42,7 +42,10 @@ function getTransform (string, position) {
   var text_width = OUTPUT_WIDTH - TEXT_PADDING * 2
   var font_size = getFontSize(string, text_width)
   return {
-    border: '8px_solid_black',
+    border: {
+      width: Math.ceil(font_size / 8),
+      color: 'black'
+    },
     color: '#ffffff',
     crop: 'fit',
     gravity: gravity,
