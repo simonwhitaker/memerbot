@@ -34,6 +34,7 @@ const USER_UPLOAD_TAG = 'user-upload'
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true})
 var messageQueue = []
+var isProcessingMessageQueue = false
 
 var app = express()
 
@@ -482,10 +483,18 @@ function enqueueMessage(messageData) {
  */
 function _processMessageQueue () {
   console.log('Current queue length: ' + messageQueue.length)
-  if (messageQueue.length === 0) {
-    console.log('Queue is empty, nothing to do.')
+
+  if (isProcessingMessageQueue) {
+    console.log('Queue already being processed - aborting.')
     return
   }
+
+  if (messageQueue.length === 0) {
+    console.log('Queue is empty - aborting.')
+    return
+  }
+
+  isProcessingMessageQueue = true
   var messageData = messageQueue.shift()
   request({
     json: messageData,
@@ -504,6 +513,7 @@ function _processMessageQueue () {
       console.error(response)
       console.error(error)
     }
+    isProcessingMessageQueue = false
     _processMessageQueue()
   })
 }
