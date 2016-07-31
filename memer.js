@@ -18,7 +18,8 @@ const POSITION_TO_GRAVITY = {
   top: 'north',
   bottom: 'south'
 }
-const TEXT_PADDING = 10
+const TEXT_PADDING_HORIZONTAL = 10
+const TEXT_PADDING_VERTICAL = 20
 
 // Font size constants
 const STRING_LENGTH_FACTOR = 20
@@ -39,7 +40,7 @@ function getTransform (string, position) {
     gravity = POSITION_TO_GRAVITY[DEFAULT_POSITION]
   }
 
-  var text_width = OUTPUT_WIDTH - TEXT_PADDING * 2
+  var text_width = OUTPUT_WIDTH - TEXT_PADDING_HORIZONTAL * 2
   var font_size = getFontSize(string, text_width)
   return {
     border: {
@@ -57,7 +58,31 @@ function getTransform (string, position) {
       text_align: 'center'
     },
     width: text_width,
-    y: TEXT_PADDING
+    y: TEXT_PADDING_VERTICAL
+  }
+}
+
+function getWatermarkTransform () {
+  var text_width = OUTPUT_WIDTH - TEXT_PADDING_HORIZONTAL * 2
+  var font_size = Math.ceil(text_width / 24)
+  return {
+    border: {
+      width: 2,
+      color: 'black'
+    },
+    color: '#ffffff',
+    crop: 'fit',
+    gravity: 'south_east',
+    overlay: {
+      font_family: 'Helvetica',
+      font_size: font_size,
+      font_weight: 'bold',
+      stroke: 'stroke',
+      text: 'm.me/memerbot'
+    },
+    width: text_width,
+    x: 5,
+    y: 5
   }
 }
 
@@ -65,12 +90,21 @@ exports.getMemeUrl = (cloudinary_public_id, top_string, bottom_string) => {
   var transforms = [
     { width: OUTPUT_WIDTH }
   ]
+
+  var should_show_watermark = false
+
   if (top_string && top_string.length > 0) {
     transforms.push(getTransform(top_string, 'top'))
+    should_show_watermark = true
   }
 
   if (bottom_string && bottom_string.length > 0) {
     transforms.push(getTransform(bottom_string, 'bottom'))
+    should_show_watermark = true
+  }
+
+  if (should_show_watermark) {
+    transforms.push(getWatermarkTransform())
   }
 
   var transformed_url = cloudinary.url(cloudinary_public_id, {
