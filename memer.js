@@ -19,7 +19,7 @@ const POSITION_TO_GRAVITY = {
   bottom: 'south'
 }
 const TEXT_PADDING_HORIZONTAL = 10
-const TEXT_PADDING_VERTICAL = 20
+const TEXT_PADDING_VERTICAL = 25
 
 // Font size constants
 const STRING_LENGTH_FACTOR = 20
