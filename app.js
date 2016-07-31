@@ -236,7 +236,7 @@ function receivedMessage (event) {
     var command = parseResult.command.replace(/\W/g, '')
     if (POSITION_TO_GRAVITY[command]) {
       sendMemedImage(senderID, command, parseResult.args)
-    } else if (command === 'stock') {
+    } else if (command === 'stock' || command === 'meme') {
       setStockImage(senderID, parseResult.args)
     } else if (command === 'help') {
       sendHelpMessage(senderID)
@@ -288,13 +288,15 @@ function sendInstructionsForNewImage (senderID) {
 
 function setStockImage (senderID, imageID) {
   if (imageID && imageID.length > 0) {
+    // TODO: Check if imageID is valid
+
     var currentConfig = {}
     currentConfig[CLOUDINARY_PUBLIC_ID_KEY] = 'stock/' + imageID
     redisClient.set(senderID, JSON.stringify(currentConfig))
 
     // Let them see what they chose
-    var transformed_url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
-    sendImageMessage(senderID, transformed_url)
+    var url = memer.getMemeUrl(currentConfig[CLOUDINARY_PUBLIC_ID_KEY])
+    sendImageMessage(senderID, url)
     sendInstructionsForNewImage(senderID)
   } else {
     (function (sndrID) {
